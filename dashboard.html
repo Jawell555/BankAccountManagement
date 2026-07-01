@@ -1,0 +1,876 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Summit PhilBank</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css"
+        integrity="sha512-2SwdPD6INVrV/lHTZbO2nodKhrnDdJK9/kg2XD1r9uGqPo1cUbujc+IYdlYdEErWNu69gVcYgdxlmVmzTWnetw=="
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="stylesheet" href="assets/css/dashboard.css">
+    <link rel="icon" type="image/x-icon" href="assets/src/bank_logo.png">
+</head>
+
+<body>
+    <div class="window">
+        <div class="topbar">
+            <div class="title">
+                <div class="company">
+                    <span class="icon"><img src="assets/src/bank_logo.png" alt="Logo"></span>
+                    <h1>Summit PhilBank</h1>
+                </div>
+                <div class="logout">
+                    <i class="fas fa-sign-out-alt" id="sign-out"></i>
+                </div>
+
+            </div>
+        </div>
+        <div class="sidebar">
+            <div class="current-user">
+                <span class="icon" id="current-user-icon"><img src="assets/src/profile.png" alt="User Icon"></span>
+                <span class="name" id="current-username">Summit PhilBank</span>
+                <span class="email" id="current-email">summitphilbank@email.com</span>
+            </div>
+            <div class="menu">
+                <a class="menu-item active" data-content="dashboard">Dashboard</a>
+                <a class="menu-item" id="employee-trigger">
+                    <div class="menu-item-text">
+                        Manage Employees<i class="fas fa-chevron-down"></i>
+                    </div>
+                </a>
+                <div class="sub-menu" id="employee-submenu">
+                    <a class="menu-item sub-item" data-content="view-employees">View Employee</a>
+                    <a class="menu-item sub-item" data-content="add-employees">Add Employees</a>
+                </div>
+                <a class="menu-item" id="account-trigger">
+                    <div class="menu-item-text">
+                        Manage Accounts<i class="fas fa-chevron-down"></i>
+                    </div>
+                </a>
+                <div class="sub-menu" id="account-submenu">
+                    <a class="menu-item sub-item" data-content="view-accounts">View Accounts</a>
+                    <a class="menu-item sub-item" data-content="add-accounts">Add Accounts</a>
+                </div>
+                <a class="menu-item" id="operation-trigger">
+                    <div class="menu-item-text">
+                        Account Operations<i class="fas fa-chevron-down"></i>
+                    </div>
+                </a>
+                <div class="sub-menu" id="operation-submenu">
+                    <a class="menu-item sub-item" data-content="deposit-operations">Deposit</a>
+                    <a class="menu-item sub-item" data-content="withdraw-operations">Withdraw</a>
+                    <a class="menu-item sub-item" data-content="transfer-operations">Transfer</a>
+                </div>
+                <a class="menu-item" data-content="bank-balance">Bank Balance</a>
+                <a class="menu-item" data-content="account-profile">Account Profile</a>
+
+            </div>
+        </div>
+        <!-- Dashboard Content -->
+        <div class="content active" id="dashboard">
+            <h1>Dashboard</h1>
+            <div class="dashboard-widgets">
+                <div class="widget-row">
+                    <div class="widget">
+                        <h2>ADMINS</h2>
+                        <p id="total-admins">0</p>
+                    </div>
+                    <div class="widget">
+                        <h2>EMPLOYEES</h2>
+                        <p id="total-employees">0</p>
+                    </div>
+                    <div class="widget">
+                        <h2>CURRENT ACCOUNTS</h2>
+                        <p id="current-amount">0</p>
+                    </div>
+                    <div class="widget">
+                        <h2>SAVINGS ACCOUNTS</h2>
+                        <p id="savings-accounts">0</p>
+                    </div>
+                </div>
+                <div class="widget-row">
+                    <div class="widget">
+                        <h2>BANK BALANCE</h2>
+                        <p id="bank-balance-amount">$0.00</p>
+                    </div>
+                    <div class="widget">
+                        <h2>DEPOSIT TOTAL</h2>
+                        <p id="deposit-total">$0.00</p>
+                    </div>
+                    <div class="widget">
+                        <h2>TRANSACTED TOTAL</h2>
+                        <p id="transacted-total">$0.00</p>
+                    </div>
+                    <div class="widget">
+                        <h2>WITHDRAW TOTAL</h2>
+                        <p id="withdraw-total">$0.00</p>
+                    </div>
+                </div>
+            </div>
+            <h1>Information Board</h1>
+            <div class="information-board">
+                <div class="info-table">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Employee ID</th>
+                                <th>Employee Name</th>
+                                <th>Email</th>
+                                <th>ID Number</th>
+                                <th>Date</th>
+                                <th>Employee Type</th>
+                            </tr>
+                        </thead>
+                        <tbody id="transaction-table-body">
+                            <tr>
+                                <td>No data available</td>
+                                <td>No data available</td>
+                                <td>No data available</td>
+                                <td>No data available</td>
+                                <td>No data available</td>
+                                <td>No data available</td>
+                            </tr>
+                            <tr>
+                                <td>No data available</td>
+                                <td>No data available</td>
+                                <td>No data available</td>
+                                <td>No data available</td>
+                                <td>No data available</td>
+                                <td>No data available</td>
+                            </tr>
+                            <tr>
+                                <td>No data available</td>
+                                <td>No data available</td>
+                                <td>No data available</td>
+                                <td>No data available</td>
+                                <td>No data available</td>
+                                <td>No data available</td>
+                            </tr>
+                            <tr>
+                                <td>No data available</td>
+                                <td>No data available</td>
+                                <td>No data available</td>
+                                <td>No data available</td>
+                                <td>No data available</td>
+                                <td>No data available</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="pagination-container">
+                <button id="dash-btn-prev" onclick="prevPage()"><i class="fas fa-chevron-left"></i></button>
+                <div id="dash-page-numbers">X</div>
+                <button id="dash-btn-next" onclick="nextPage()"><i class="fas fa-chevron-right"></i></button>
+            </div>
+        </div>
+        <!-- View Employees -->
+        <div class="content" id="view-employees">
+            <h1>View Employees</h1>
+            <div class="filter">
+                <div class="search">
+                    <input type="text" id="employee-filter" placeholder="Enter ID No. or Name">
+                    <i class="fas fa-search search-icon"></i>
+                </div>
+
+                <select id="employee-type-filter">
+                    <option value="">All Types</option>
+                    <option value="Admin">Admin</option>
+                    <option value="Employee">Employee</option>
+                </select>
+
+                <button type="button" id="employee-filter-btn">Filter</button>
+            </div>
+            <div class="employee-table">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Employee ID</th>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>Contact Number</th>
+                            <th>Date</th>
+                            <th>Status</th>
+                            <th>Operations</th>
+                        </tr>
+                    </thead>
+                    <tbody id="employee-table-body">
+                        <tr>
+                            <td>EMP001</td>
+                            <td>John Doe</td>
+                            <td>john.doe@example.com</td>
+                            <td>123-456-7890</td>
+                            <td>2023-01-01</td>
+                            <td>Active</td>
+                            <td>
+                                <button class="view-btn">View</button>
+                                <button class="edit-btn">Edit</button>
+                                <button class="delete-btn">Delete</button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="pagination-container">
+                <button id="emp-btn-prev" onclick="prevPage()"><i class="fas fa-chevron-left"></i></button>
+                <div id="emp-page-numbers">X</div>
+                <button id="emp-btn-next" onclick="nextPage()"><i class="fas fa-chevron-right"></i></button>
+            </div>
+        </div>
+        <!-- Add Employees -->
+        <div class="content" id="add-employees">
+            <div class="add-employee-header">
+                <h1>Add Employees</h1>
+                <input type="text" id="employee-id" name="employee-id" value="EMP000000001" readonly>
+            </div>
+            <div class="employee-form">
+                <form id="add-employee-form">
+                    <div class="personal-info">
+                        <h2>Personal Information</h2>
+                        <div class="form-group">
+                            <label for="employee-first-name">First Name</label>
+                            <input type="text" id="employee-first-name" name="employee-first-name"
+                                placeholder="Enter first name..." required>
+                        </div>
+                        <div class="form-group">
+                            <label for="employee-last-name">Last Name</label>
+                            <input type="text" id="employee-last-name" name="employee-last-name"
+                                placeholder="Enter last name..." required>
+                        </div>
+                        <div class="form-group">
+                            <label for="employee-birth">Date of Birth</label>
+                            <input type="date" id="employee-birth" name="employee-birth" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="employee-gender">Gender</label>
+                            <select id="employee-gender" name="employee-gender" required>
+                                <option value="">Select Gender</option>
+                                <option value="male">Male</option>
+                                <option value="female">Female</option>
+                                <option value="other">Other</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="employee-marital">Marital Status</label>
+                            <select id="employee-marital" name="employee-marital" required>
+                                <option value="">Select Marital Status</option>
+                                <option value="single">Single</option>
+                                <option value="married">Married</option>
+                                <option value="divorced">Divorced</option>
+                                <option value="widowed">Widowed</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="employee-email">Email</label>
+                            <input type="email" id="employee-email" name="employee-email"
+                                placeholder="Enter email address..." required>
+                        </div>
+                        <div class="form-group">
+                            <label for="employee-contact">Contact Number</label>
+                            <input type="text" id="employee-contact" name="employee-contact" value="09XXXXXXXXX"
+                                required>
+                        </div>
+                    </div>
+                    <div class="address">
+                        <h2>Address</h2>
+                        <div class="form-group">
+                            <label for="employee-postal">Postal Code</label>
+                            <input type="text" id="employee-postal" name="employee-postal"
+                                placeholder="Enter postal code..." required>
+                        </div>
+                        <div class="form-group">
+                            <label for="employee-address">Home Address</label>
+                            <input type="text" id="employee-address" name="employee-address"
+                                placeholder="Enter home address..." required>
+                        </div>
+                        <div class="form-group">
+                            <label for="employee-city">City</label>
+                            <input type="text" id="employee-city" name="employee-city" placeholder="Enter city..."
+                                required>
+                        </div>
+                    </div>
+                    <div class="education-experience">
+                        <h2>Education and Experience</h2>
+                        <div class="form-group">
+                            <label for="employee-education">Educational Attainment</label>
+                            <input type="text" id="employee-education" name="employee-education"
+                                placeholder="Enter educational attainment..." required>
+                        </div>
+                        <div class="form-group">
+                            <label for="employee-experience">Work Experience</label>
+                            <input type="text" id="employee-experience" name="employee-experience"
+                                placeholder="Enter year experience..." required>
+                        </div>
+                        <div class="form-group">
+                            <label for="employee-title">Job Title</label>
+                            <input type="text" id="employee-title" name="employee-title"
+                                placeholder="Enter job title..." required>
+                        </div>
+                    </div>
+                    <div class="details">
+                        <h2>Employee Details</h2>
+                        <div class="form-group">
+                            <label for="employee-username">Username</label>
+                            <input type="text" id="employee-username" name="employee-username"
+                                placeholder="Enter username..." required>
+                        </div>
+                        <div class="form-group">
+                            <label for="employee-type">Employee Type</label>
+                            <input type="text" id="employee-type" name="employee-type" value="Employee" readonly>
+                        </div>
+                        <div class="form-group">
+                            <label for="employee-password">Default Password</label>
+                            <input type="text" id="employee-password" name="employee-password" value="EMP000000001"
+                                readonly>
+                        </div>
+                    </div>
+                    <div class="submit-form">
+                        <button class="submit-btn" type="submit">Add Employee</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <!-- View Accounts -->
+        <div class="content" id="view-accounts">
+            <h1>View Accounts</h1>
+            <div class="filter">
+                <div class="search">
+                    <input type="text" id="account-filter" placeholder="Enter ID No. or Name">
+                    <i class="fas fa-search search-icon"></i>
+                </div>
+
+                <select id="account-type-filter">
+                    <option value="">All Types</option>
+                    <option value="Savings">Savings</option>
+                    <option value="Current">Current</option>
+                </select>
+
+                <button type="button" id="account-filter-btn">Filter</button>
+            </div>
+            <div class="account-table">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Account ID</th>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>Contact Number</th>
+                            <th>Date</th>
+                            <th>Status</th>
+                            <th>Operations</th>
+                        </tr>
+                    </thead>
+                    <tbody id="account-table-body">
+                        <tr>
+                            <td>ACC001</td>
+                            <td>John Doe</td>
+                            <td>john.doe@example.com</td>
+                            <td>123-456-7890</td>
+                            <td>2023-01-01</td>
+                            <td>Active</td>
+                            <td>
+                                <button class="view-btn">View</button>
+                                <button class="edit-btn">Edit</button>
+                                <button class="delete-btn">Delete</button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="pagination-container">
+                <button id="acc-btn-prev" onclick="prevPage()"><i class="fas fa-chevron-left"></i></button>
+                <div id="acc-page-numbers">X</div>
+                <button id="acc-btn-next" onclick="nextPage()"><i class="fas fa-chevron-right"></i></button>
+            </div>
+        </div>
+        <!-- Add Accounts -->
+        <div class="content" id="add-accounts">
+            <div class="add-account-header">
+                <h1>Add Accounts</h1>
+                <input type="text" id="account-id" name="account-id" value="ACC000000001" readonly>
+            </div>
+            <div class="account-form">
+                <form id="add-account-form">
+                    <div class="personal-info">
+                        <h2>Personal Information</h2>
+                        <div class="form-group">
+                            <label for="account-first-name">First Name</label>
+                            <input type="text" id="account-first-name" name="account-first-name"
+                                placeholder="Enter first name..." required>
+                        </div>
+                        <div class="form-group">
+                            <label for="account-last-name">Last Name</label>
+                            <input type="text" id="account-last-name" name="account-last-name"
+                                placeholder="Enter last name..." required>
+                        </div>
+                        <div class="form-group">
+                            <label for="account-birth">Date of Birth</label>
+                            <input type="date" id="account-birth" name="account-birth" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="account-gender">Gender</label>
+                            <select id="account-gender" name="account-gender" required>
+                                <option value="">Select Gender</option>
+                                <option value="male">Male</option>
+                                <option value="female">Female</option>
+                                <option value="other">Other</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="account-id-type">Presented ID</label>
+                            <select id="account-id-type" name="account-id-type" required>
+                                <option value="">Select ID Type</option>
+                                <option value="passport">Passport</option>
+                                <option value="driver-license">Driver's License</option>
+                                <option value="national-id">National ID</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="account-id-number">ID Number</label>
+                            <input type="text" id="account-id-number" name="account-id-number"
+                                placeholder="Enter ID number..." required>
+                        </div>
+                        <div class="form-group">
+                            <label for="account-marital">Marital Status</label>
+                            <select id="account-marital" name="account-marital" required>
+                                <option value="">Select Marital Status</option>
+                                <option value="single">Single</option>
+                                <option value="married">Married</option>
+                                <option value="divorced">Divorced</option>
+                                <option value="widowed">Widowed</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="account-email">Email</label>
+                            <input type="email" id="account-email" name="account-email"
+                                placeholder="Enter email address..." required>
+                        </div>
+                        <div class="form-group">
+                            <label for="account-contact">Contact Number</label>
+                            <input type="text" id="account-contact" name="account-contact" value="09XXXXXXXXX" required>
+                        </div>
+                    </div>
+                    <div class="address">
+                        <h2>Address</h2>
+                        <div class="form-group">
+                            <label for="account-postal">Postal Code</label>
+                            <input type="text" id="account-postal" name="account-postal"
+                                placeholder="Enter postal code..." required>
+                        </div>
+                        <div class="form-group">
+                            <label for="account-address">Home Address</label>
+                            <input type="text" id="account-address" name="account-address"
+                                placeholder="Enter home address..." required>
+                        </div>
+                        <div class="form-group">
+                            <label for="account-city">City</label>
+                            <input type="text" id="account-city" name="account-city" placeholder="Enter city..."
+                                required>
+                        </div>
+                    </div>
+                    <div class="details">
+                        <h2>Account Details</h2>
+                        <div class="form-group">
+                            <label for="account-title">Account Title</label>
+                            <input type="text" id="account-title" name="account-title"
+                                placeholder="Enter account title..." required>
+                        </div>
+                        <div class="form-group">
+                            <label for="account-type">Account Type</label>
+                            <select id="account-type" name="account-type" required>
+                                <option value="">Select Account Type</option>
+                                <option value="savings">Savings</option>
+                                <option value="current">Current</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="account-balance">Initial Deposit</label>
+                            <input type="text" id="account-balance" name="account-balance"
+                                placeholder="Enter initial deposit..." required>
+                        </div>
+                    </div>
+                    <div class="submit-form">
+                        <button class="submit-btn" type="submit">Add Account</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div class="content" id="deposit-operations">
+            <h1>Deposit Operations</h1>
+            <div class="account-search">
+                <div class="search-group">
+                    <label for="deposit-account-search">Search Account:</label>
+                    <input type="text" id="deposit-account-search" placeholder="Enter Account ID">
+                </div>
+                <div class="search-group">
+                    <button type="button" id="deposit-search-btn">Search Account</button>
+                </div>
+            </div>
+            <div class="account-information">
+                <div class="info-group">
+                    <label for="deposit-account-title">Account Title:</label>
+                    <input type="text" id="deposit-account-title" placeholder="Account Title" readonly>
+                </div>
+                <div class="info-group">
+                    <label for="deposit-account-name">Account Name:</label>
+                    <input type="text" id="deposit-account-name" placeholder="Account Name" readonly>
+                </div>
+                <div class="info-group">
+                    <label for="deposit-account-number">Account Number:</label>
+                    <input type="text" id="deposit-account-number" placeholder="Account Number" readonly>
+                </div>
+                <div class="info-group">
+                    <label for="deposit-account-status">Account Status:</label>
+                    <input type="text" id="deposit-account-status" placeholder="Account Status" readonly>
+                </div>
+                <div class="info-group">
+                    <label for="deposit-account-type">Account Type:</label>
+                    <input type="text" id="deposit-account-type" placeholder="Account Type" readonly>
+                </div>
+                <div class="info-group">
+                    <label for="deposit-account-balance">Current Balance:</label>
+                    <input type="text" id="deposit-account-balance" placeholder="Current Balance" readonly>
+                </div>
+            </div>
+            <div class="deposit-information">
+                <div class="info-group">
+                    <label for="deposit-reference">Reference Number:</label>
+                    <input type="text" id="deposit-reference" placeholder="REF0000000000001" readonly>
+                </div>
+                <div class="info-group">
+                    <label for="deposit-method">Deposit Method:</label>
+                    <select type="text" id="deposit-method" placeholder="Deposit Method">
+                        <option value="cash">Cash</option>
+                        <option value="check">Check</option>
+                    </select>
+                </div>
+                <div class="info-group">
+                    <label for="deposit-amount">Deposit Amount:</label>
+                    <input type="text" id="deposit-amount" placeholder="Deposit Amount">
+                </div>
+                <div class="info-group">
+                    <label for="deposit-live-datetime">Date & Time:</label>
+                    <input type="text" id="deposit-live-datetime" placeholder="Date & Time" readonly>
+                </div>
+                <div class="info-group">
+                    <label for="deposit-depositor-name">Depositor's Name:</label>
+                    <input type="text" id="deposit-depositor-name" placeholder="Depositor's Name">
+                </div>
+            </div>
+            <div class="deposit-actions">
+                <button type="button" id="deposit-btn">Deposit</button>
+            </div>
+        </div>
+
+        <div class="content" id="withdraw-operations">
+            <h1>Withdraw Operations</h1>
+            <div class="account-search">
+                <div class="search-group">
+                    <label for="withdraw-account-search">Search Account:</label>
+                    <input type="text" id="withdraw-account-search" placeholder="Enter Account ID">
+                </div>
+                <div class="search-group">
+                    <button type="button" id="withdraw-search-btn">Search Account</button>
+                </div>
+            </div>
+            <div class="account-information">
+                <div class="info-group">
+                    <label for="withdraw-account-title">Account Title:</label>
+                    <input type="text" id="withdraw-account-title" placeholder="Account Title" readonly>
+                </div>
+                <div class="info-group">
+                    <label for="withdraw-account-name">Account Name:</label>
+                    <input type="text" id="withdraw-account-name" placeholder="Account Name" readonly>
+                </div>
+                <div class="info-group">
+                    <label for="withdraw-account-number">Account Number:</label>
+                    <input type="text" id="withdraw-account-number" placeholder="Account Number" readonly>
+                </div>
+                <div class="info-group">
+                    <label for="withdraw-account-status">Account Status:</label>
+                    <input type="text" id="withdraw-account-status" placeholder="Account Status" readonly>
+                </div>
+                <div class="info-group">
+                    <label for="withdraw-account-type">Account Type:</label>
+                    <input type="text" id="withdraw-account-type" placeholder="Account Type" readonly>
+                </div>
+                <div class="info-group">
+                    <label for="withdraw-account-balance">Current Balance:</label>
+                    <input type="text" id="withdraw-account-balance" placeholder="Current Balance" readonly>
+                </div>
+            </div>
+            <div class="withdraw-information">
+                <div class="info-group">
+                    <label for="withdraw-reference">Reference Number:</label>
+                    <input type="text" id="withdraw-reference" placeholder="REF0000000000001" readonly>
+                </div>
+                <div class="info-group">
+                    <label for="withdraw-method">Withdrawal Method:</label>
+                    <select type="text" id="withdraw-method" placeholder="Withdrawal Method">
+                        <option value="cash">Cash</option>
+                        <option value="check">Check</option>
+                    </select>
+                </div>
+                <div class="info-group">
+                    <label for="withdraw-amount">Withdrawal Amount:</label>
+                    <input type="text" id="withdraw-amount" placeholder="Withdrawal Amount">
+                </div>
+                <div class="info-group">
+                    <label for="withdraw-live-datetime">Date & Time:</label>
+                    <input type="text" id="withdraw-live-datetime" placeholder="Date & Time" readonly>
+                </div>
+                <div class="info-group">
+                    <label for="withdraw-withdrawer-name">Withdrawer's Name:</label>
+                    <input type="text" id="withdraw-withdrawer-name" placeholder="Withdrawer's Name">
+                </div>
+            </div>
+            <div class="withdraw-actions">
+                <button type="button" id="withdraw-btn">Withdraw</button>
+            </div>
+        </div>
+
+        <div class="content" id="transfer-operations">
+            <h1>Transfer Operations</h1>
+            <div class="account-search">
+                <div class="search-group">
+                    <label for="sender-account-search">Search Sender Account:</label>
+                    <input type="text" id="sender-account-search" placeholder="Enter Account ID">
+                </div>
+                <div class="search-group">
+                    <label for="receiver-account-search">Search Receiver Account:</label>
+                    <input type="text" id="receiver-account-search" placeholder="Enter Account ID">
+                </div>
+                <div class="search-group">
+                    <button type="button" id="transfer-search-btn">Search Account</button>
+                </div>
+            </div>
+            <div class="transfer-information">
+                <div class="sender-information">
+                    <h3>Sender Account Information: </h3>
+                    <div class="info-group">
+                        <label for="sender-account-title">Account Title:</label>
+                        <input type="text" id="sender-account-title" placeholder="Account Title" readonly>
+                    </div>
+                    <div class="info-group">
+                        <label for="sender-account-number">Account Number:</label>
+                        <input type="text" id="sender-account-number" placeholder="Account Number" readonly>
+                    </div>
+                    <div class="info-group">
+                        <label for="sender-bank-name">Bank Name:</label>
+                        <input type="text" id="sender-bank-name" placeholder="Bank Name" readonly>
+                    </div>
+                    <div class="info-group">
+                        <label for="sender-account-status">Account Status:</label>
+                        <input type="text" id="sender-account-status" placeholder="Account Status" readonly>
+                    </div>
+                    <div class="info-group">
+                        <label for="sender-account-balance">Current Balance:</label>
+                        <input type="text" id="sender-account-balance" placeholder="Current Balance" readonly>
+                    </div>
+                </div>
+                <div class="receiver-information">
+                    <h3>Receiver Account Information: </h3>
+                    <div class="info-group">
+                        <label for="receiver-account-title">Receiver Account Title:</label>
+                        <input type="text" id="receiver-account-title" placeholder="Account Title" readonly>
+                    </div>
+                    <div class="info-group">
+                        <label for="receiver-account-number">Account Number:</label>
+                        <input type="text" id="receiver-account-number" placeholder="Account Number" readonly>
+                    </div>
+                    <div class="info-group">
+                        <label for="receiver-bank-name">Bank Name:</label>
+                        <input type="text" id="receiver-bank-name" placeholder="Bank Name" readonly>
+                    </div>
+                    <div class="info-group">
+                        <label for="receiver-account-status">Account Status:</label>
+                        <input type="text" id="receiver-account-status" placeholder="Account Status" readonly>
+                    </div>
+                    <div class="info-group">
+                        <label for="receiver-account-balance">Current Balance:</label>
+                        <input type="text" id="receiver-account-balance" placeholder="Current Balance" readonly>
+                    </div>
+                </div>
+            </div>
+            <div class="transfer-details">
+                <div class="transaction-details">
+                    <div class="info-group">
+                        <label for="transfer-reference">Reference Number:</label>
+                        <input type="text" id="transfer-reference" placeholder="REF0000000000001" readonly>
+                    </div>
+                    <div class="info-group">
+                        <label for="transfer-method">Transfer Method:</label>
+                        <select type="text" id="transfer-method" placeholder="Transfer Method">
+                            <option value="cash">Internal Transfer</option>
+                            <option value="check">External Transfer</option>
+                        </select>
+                    </div>
+                    <div class="info-group">
+                        <label for="transfer-live-datetime">Date & Time:</label>
+                        <input type="text" id="transfer-live-datetime" placeholder="Date & Time" readonly>
+                    </div>
+                    <div class="info-group">
+                        <label for="transfer-amount">Transfer Amount:</label>
+                        <input type="text" id="transfer-amount" placeholder="Transfer Amount">
+                    </div>
+                </div>
+                <div class="transfer-total">
+                    <label for="transfer-fee">Transfer Fee: <span id="transfer-fee-value">$0.00</span></label>
+                    <label for="transfer-total">Total Transfer Amount: <span
+                            id="transfer-total-value">$0.00</span></label>
+                    <div class="transfer-actions">
+                        <button type="button" id="transfer-btn">Transfer</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="content" id="bank-balance">
+            <h1>Bank Balance</h1>
+            <div class="filter">
+                <div class="search">
+                    <input type="text" id="reference-filter" placeholder="Enter ID No. or Name">
+                    <i class="fas fa-search search-icon"></i>
+                </div>
+                <select id="transaction-type-filter">
+                    <option value="">All Types</option>
+                    <optgroup label="Account Creation & Closure">
+                        <option value="Account Creation">Account Creation</option>
+                        <option value="Account Closure">Account Closure</option>
+                    </optgroup>
+                    <optgroup label="Deposit">
+                        <option value="All Deposit">All Deposits</option>
+                        <option value="Deposit - Cash">Cash Deposit</option>
+                        <option value="Deposit - Check">Check Deposit</option>
+                    </optgroup>
+                    <optgroup label="Withdrawal">
+                        <option value="All Withdrawal">All Withdrawals</option>
+                        <option value="Withdrawal - Cash">Cash Withdrawal</option>
+                        <option value="Withdrawal - Check">Check Withdrawal</option>
+                    </optgroup>
+                    <optgroup label="Transfer">
+                        <option value="All Transfer">All Transfers</option>
+                        <option value="Transfer - Internal">Internal Transfer</option>
+                        <option value="Transfer - External">External Transfer</option>
+                    </optgroup>
+                </select>
+                <label for="start-date-filter">Start Date:</label>
+                <input type="date" id="start-date-filter" placeholder="Select Date">
+                <label for="end-date-filter">End Date:</label>
+                <input type="date" id="end-date-filter" placeholder="Select End Date">
+
+                <button type="button" id="account-filter-btn">Filter</button>
+            </div>
+
+            <div class="bank-table">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Reference Number</th>
+                            <th>Account Name</th>
+                            <th>Account Number</th>
+                            <th>Transaction Type</th>
+                            <th>Transact With</th>
+                            <th>Date & Time</th>
+                            <th>Processed By</th>
+                            <th>Amount</th>
+                        </tr>
+                    </thead>
+                    <tbody id="account-table-body">
+                        <tr>
+                            <td>REF000000000001</td>
+                            <td>John Doe</td>
+                            <td>ACC001</td>
+                            <td>Account Creation</td>
+                            <td>John Doe</td>
+                            <td>2023-01-01 10:00 AM</td>
+                            <td>Juan Dela Cruz</td>
+                            <td>PHP 10,000.00</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="pagination-container">
+                <button id="bank-btn-prev" onclick="prevPage()"><i class="fas fa-chevron-left"></i></button>
+                <div id="bank-page-numbers">X</div>
+                <button id="bank-btn-next" onclick="nextPage()"><i class="fas fa-chevron-right"></i></button>
+            </div>
+
+        </div>
+
+        <div class="content" id="account-profile">
+            <div class="account-profile-header">
+                <h1>Account Profile</h1>
+                <input type="text" id="profile-employee-id" name="profile-employee-id" value="EMP000000001" readonly>
+            </div>
+            <div class="user-profile">
+                <div class="user-profile-image">
+                    <h2>Profile Picture</h2>
+                    <img src="assets/src/profile.png" alt="Profile Picture" class="profile-pic">
+                </div>
+                <div class="personal-info">
+                    <h2>Personal Information</h2>
+                    <div class="profile-group">
+                        <label for="profile-employee-name">Name</label>
+                        <input type="text" id="profile-employee-name" name="profile-employee-name" value="John Doe"
+                            readonly>
+                    </div>
+                    <div class="profile-group">
+                        <label for="profile-employee-birth">Date of Birth</label>
+                        <input type="date" id="profile-employee-birth" name="profile-employee-birth" value="1990-01-01"
+                            readonly>
+                    </div>
+                    <div class="profile-group">
+                        <label for="profile-employee-gender">Gender</label>
+                        <input type="text" id="profile-employee-gender" name="profile-employee-gender" value="Male"
+                            readonly>
+                    </div>
+                    <div class="profile-group">
+                        <label for="profile-employee-marital">Marital Status</label>
+                        <input type="text" id="profile-employee-marital" name="profile-employee-marital" value="Single"
+                            readonly>
+                    </div>
+                    <div class="profile-group">
+                        <label for="profile-employee-email">Email</label>
+                        <input type="email" id="profile-employee-email" name="profile-employee-email"
+                            value="john.doe@example.com" readonly>
+                    </div>
+                    <div class="profile-group">
+                        <label for="profile-employee-contact">Contact Number</label>
+                        <input type="text" id="profile-employee-contact" name="profile-employee-contact"
+                            value="09XXXXXXXXX" readonly>
+                    </div>
+                </div>
+                <div class="address">
+                    <h2>Address</h2>
+                    <div class="profile-group">
+                        <label for="profile-employee-postal">Postal Code</label>
+                        <input type="text" id="profile-employee-postal" name="profile-employee-postal" value="12345"
+                            readonly>
+                    </div>
+                    <div class="profile-group">
+                        <label for="profile-employee-address">Home Address</label>
+                        <input type="text" id="profile-employee-address" name="profile-employee-address"
+                            value="123 Main Street" readonly>
+                    </div>
+                    <div class="profile-group">
+                        <label for="profile-employee-city">City</label>
+                        <input type="text" id="profile-employee-city" name="profile-employee-city" value="Anytown"
+                            readonly>
+                    </div>
+                </div>
+                <div class="change-password">
+                    <button id="change-password-btn">Change Password</button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script type="module" src="assets/js/config/app.js"></script>
+    <script type="module" src="assets/js/controllers/dashboard.js"></script>
+</body>
+
+</html>

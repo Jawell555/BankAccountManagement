@@ -1,0 +1,98 @@
+*{
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body{
+    background-image: url('../src/bg.jpg');
+    background-size: cover;
+    background-position: center;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    padding: 1rem;
+    font-family: 'Segoe UI', sans-serif;
+}
+
+.login-container{
+    background-color: rgb(225, 244, 255, 0.5);
+    border-radius: 1rem;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    width: 100%;
+    max-width: 600px;
+    padding: 1.5rem;
+}
+
+.login-header{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 1.5rem;
+}
+
+h1{
+    margin-left: 15px;
+    font-size: 2rem;
+    margin-top: 0;
+}
+
+.logo{
+    display: block;
+    width: 40px;
+}
+
+.input-group{
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: left;
+    width: 130%;
+    margin: 0 -15%;
+    margin-bottom: .5rem;
+    gap: .5rem;
+}
+
+.login-form{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 1rem;
+    width: 100%;
+}
+
+.login-btn{
+    background-color: #031B42;
+    color: white;
+    border: none;
+    padding: 0.8rem 1.5rem;
+    border-radius: 0.5rem;
+    cursor: pointer;
+    font-size: 1rem;
+    width: 50%;
+    margin: .5rem 25%;
+    transition: background-color 0.3s ease;
+}
+.login-btn:hover{
+    background-color: #0E447D;
+    opacity: 0.8;
+}
+label{
+    font-size: 1rem;
+    color: #000000;
+    font-weight: 500;
+}
+input[type="text"], input[type="password"]{
+    padding: .3rem;
+    font-size: 1rem;
+}
+
+@media (max-width: 768px) {
+    .login-container{
+        padding: 1rem;
+        min-width: 390px;
+    }
+
+}
