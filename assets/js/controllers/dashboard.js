@@ -85,34 +85,325 @@ function updateDateTime() {
 }
 updateDateTime();
 setInterval(updateDateTime, 1000);
+//LOAD SIDEBAR INFO
+import { getProfileEmailAndName } from '../services/dashboardServices.js';
+const sidebarNameEl = document.getElementById("current-username");
+const sidebarEmailEl = document.getElementById("current-email");
+
+sidebarNameEl.textContent = await getProfileEmailAndName().then(info => info.name ?? "Loading...");
+sidebarEmailEl.textContent = await getProfileEmailAndName().then(info => info.email ?? "Loading...");
 
 
+//load dashboard stats
 
-//
+  import { loadDashboardStats } from '../services/dashboardServices.js';
+  const totalAdminsEl = document.getElementById("total-admins");
+  const totalEmployeesEl = document.getElementById("total-employees");
+  const totalSavingsEl = document.getElementById("savings-accounts");
+  const totalCurrentEl = document.getElementById("current-accounts");
+  const totalBankBalanceEl = document.getElementById("bank-balance-amount");
+  const totalBankDepositEl = document.getElementById("deposit-total");
+  const totalBankWithdrawEl = document.getElementById("withdraw-total");
+  const totalBankTransactionsEl = document.getElementById("transacted-total");
 
-//insert new Account 
-// import { createAccount } from '../services/dashboardServices.js';
+  const stats = await loadDashboardStats();
 
-// const data = {
-//   //Personaldata
-//   account_first_name: document.getElementById('account-first-name').value,
-//   account_last_name: document.getElementById('account-last-name').value,
-//   account_date_of_birth: document.getElementById('account-birth').value,
-//   account_gender: document.getElementById('account-gender').value,
-//   account_id_type: document.getElementById('account-id-type').value,
-//   account_id_number: document.getElementById('account-id-number').value,
-//   account_marital: document.getElementById('account-marital').value,
-//   account_email: document.getElementById('account-email').value,
-//   account_contact: document.getElementById('account-contact').value,
-//   //Address
-//   account_postal: document.getElementById('account-postal').value,
-//   account_address: document.getElementById('account-address').value,
-//   account_city: document.getElementById('account-city').value,
-//   //Account Details
-//   account_title: document.getElementById('account-title').value,
-//   account_type: document.getElementById('account-type').value,
-//   account_initial_deposit: document.getElementById('account-initial-deposit').value,
-//   account_status: true, 
-//   account_created: new Date().getDate(),
-//   account_updated: new Date().getDate()
-// };
+  totalAdminsEl.textContent = stats.totalAdmins;
+  totalEmployeesEl.textContent = stats.totalEmployees;
+  totalSavingsEl.textContent = stats.totalSavings;
+  totalCurrentEl.textContent = stats.totalCurrent;
+  totalBankBalanceEl.textContent = stats.totalBankBalance;
+  totalBankDepositEl.textContent = stats.totalBankDeposit;
+  totalBankWithdrawEl.textContent = stats.totalBankWithdraw;
+  totalBankTransactionsEl.textContent = stats.totalBankTransactions;
+  
+  
+  import { initDashboardData } from '../services/dashboardServices.js';
+  document.querySelector('[data-content="dashboard"]').addEventListener('click', async () => {
+    await initDashboardData();
+  });
+  await initDashboardData();
+
+//View Employee
+ import { getEmployeesTable } from '../services/dashboardServices.js';
+ import { employeeFilter } from '../services/dashboardServices.js';
+  // Refresh Employee Table every operation clicked
+  async function refreshEmployeeTable() {
+    await getAllEmployeesTable();
+  }
+
+  let employeeTablesLoaded = false;
+  document.querySelector('[data-content="view-employees"]').addEventListener('click', async () => {
+    if (!employeeTablesLoaded) {
+      await getEmployeesTable();
+      employeeTablesLoaded = true;
+    }
+  });
+
+  document.getElementById('employee-filter-btn').addEventListener('click', async (event) => {
+    const keyword = document.getElementById('employee-filter').value;
+    const type = document.getElementById('employee-type-filter').value;
+    
+    await employeeFilter(keyword, type);
+  });
+
+
+//Add Employee
+import { generateEmployeeID } from '../services/dashboardServices.js';
+import { createEmployee } from '../services/dashboardServices.js';
+
+const employeeID = document.getElementById('employee-id');
+const employeeFirstName = document.getElementById('employee-first-name');
+const employeeLastName = document.getElementById('employee-last-name');
+const employeeBirth = document.getElementById('employee-birth');
+const employeeGender = document.getElementById('employee-gender');
+const employeeMarital = document.getElementById('employee-marital');
+const employeeEmail = document.getElementById('employee-email');
+const employeeContact = document.getElementById('employee-contact');
+
+const employeePostal = document.getElementById('employee-postal');
+const employeeAddress = document.getElementById('employee-address');
+const employeeCity = document.getElementById('employee-city');
+
+const employeeEducation = document.getElementById('employee-education');
+const employeeExperience = document.getElementById('employee-experience');
+const employeeTitle = document.getElementById('employee-title');
+
+const employeeUsername = document.getElementById('employee-username');
+const employeeType = document.getElementById('employee-type');
+const employeePassword = document.getElementById('employee-password');
+
+import { getEmployeeTypeId } from '../services/dashboardServices.js';
+import { getGenderID } from '../services/dashboardServices.js';
+import { getMaritalStatusID } from '../services/dashboardServices.js';
+
+document.querySelector('[type="submit"][name="add-employee-form"]').addEventListener('click', async (event) => {
+  event.preventDefault();
+
+  const employeeData = {
+    first_name: employeeFirstName.value,
+    last_name: employeeLastName.value,
+    role: "employee",
+    full_name: `${employeeFirstName.value} ${employeeLastName.value}`,
+    date_birth: employeeBirth.value,
+    gender: await getGenderID(employeeGender.value),
+    marital_status: await getMaritalStatusID(employeeMarital.value),
+    email: employeeEmail.value,
+    contact_no: employeeContact.value,
+    postal_code: employeePostal.value,
+    home: employeeAddress.value,
+    city: employeeCity.value,
+    attainment: employeeEducation.value,
+    experience: employeeExperience.value,
+    job_title: employeeTitle.value,
+    username: employeeUsername.value,
+    employee_type: await getEmployeeTypeId(employeeType.value),
+  };
+
+  const newEmployee = await createEmployee(employeeData);
+  if (newEmployee) {
+    alert("Employee added successfully!");
+    await refreshAddEmployeeContent();
+  }
+});
+
+  document.querySelector('[data-content="add-employees"]').addEventListener('click', async () => {
+    
+    const newEmployeeID = await generateEmployeeID();
+    employeeID.value = newEmployeeID;
+  });
+
+async function refreshAddEmployeeContent() {
+  employeeID.value = await generateEmployeeID();
+  employeeFirstName.value = "";
+  employeeLastName.value = "";
+  employeeBirth.value = "";
+  employeeGender.value = "";
+  employeeMarital.value = "";
+  employeeEmail.value = "";
+  employeeContact.value = "";
+  employeePostal.value = "";
+  employeeAddress.value = "";
+  employeeCity.value = "";
+  employeeEducation.value = "";
+  employeeExperience.value = "";
+  employeeTitle.value = "";
+  employeeUsername.value = "";
+}
+
+//View Accounts
+import { getAccountsTable } from '../services/accountServices.js';
+import { accountsFilter } from '../services/accountServices.js';
+
+let accountsTablesLoaded = false;
+document.querySelector('[data-content="view-accounts"]').addEventListener('click', async () => {
+  if (!accountsTablesLoaded) {
+    await getAccountsTable();
+    accountsTablesLoaded = true;
+  }
+});
+
+document.getElementById('account-filter-btn').addEventListener('click', async (event) => {
+  const keyword = document.getElementById('account-filter').value;
+  const type = document.getElementById('account-type-filter').value;
+  await accountsFilter(keyword, type);
+});
+
+// Add Account
+import {
+  generateAccountID,
+  getPresentedIDTypeID,
+  getAccountTypeId
+} from "../services/accountServices.js";
+import { createAccount } from "../services/accountServices.js";
+
+
+// Form + inputs
+const addAccountForm = document.getElementById("add-account-form"); // <- form element
+const accountID = document.getElementById("account-id");
+
+// Personal Information
+const accountFirstName = document.getElementById("account-first-name");
+const accountLastName = document.getElementById("account-last-name");
+const accountBirth = document.getElementById("account-birth");
+const accountGender = document.getElementById("account-gender");
+const accountIDType = document.getElementById("account-id-type");
+const accountIDNumber = document.getElementById("account-id-number");
+const accountMarital = document.getElementById("account-marital");
+const accountEmail = document.getElementById("account-email");
+const accountContact = document.getElementById("account-contact");
+
+// Address Information
+const accountPostal = document.getElementById("account-postal");
+const accountAddress = document.getElementById("account-address");
+const accountCity = document.getElementById("account-city");
+
+// Account Information
+const accountTitle = document.getElementById("account-title");
+const accountType = document.getElementById("account-type");
+const accountBalance = document.getElementById("account-balance");
+
+function toNullIfEmpty(v) {
+  const s = (v ?? "").trim();
+  return s === "" ? null : s;
+}
+
+function requiredField(input, label) {
+  if (!input?.value?.trim()) {
+    alert(`Please fill in ${label}.`);
+    return false;
+  }
+  return true;
+}
+
+// Set account ID when page/section loads (not on submit click)
+async function initAccountID() {
+  if (accountID) accountID.value = await generateAccountID();
+}
+initAccountID();
+
+if (addAccountForm) {
+  addAccountForm.addEventListener("submit", async (event) => {
+    event.preventDefault();
+
+    // Required text fields
+    const requiredChecks = [
+      [accountFirstName, "First Name"],
+      [accountLastName, "Last Name"],
+      [accountIDNumber, "ID Number"],
+      [accountEmail, "Email"],
+      [accountContact, "Contact Number"],
+      [accountPostal, "Postal Code"],
+      [accountAddress, "Address"],
+      [accountCity, "City"],
+      [accountTitle, "Account Title"]
+    ];
+
+    for (const [field, label] of requiredChecks) {
+      if (!requiredField(field, label)) return;
+    }
+
+    // Date validation
+    const birth = toNullIfEmpty(accountBirth.value);
+    if (birth == null) {
+      alert("Birth date is required.");
+      return;
+    }
+
+    // FK lookups
+    const presentedId = await getPresentedIDTypeID(accountIDType.value);
+    if (presentedId == null) {
+      alert("Please select a valid Presented ID type.");
+      return;
+    }
+
+    const genderId = await getGenderID(accountGender.value);
+    if (genderId == null) {
+      alert("Please select a valid gender.");
+      return;
+    }
+
+    const maritalStatusId = await getMaritalStatusID(accountMarital.value);
+    if (maritalStatusId == null) {
+      alert("Please select a valid marital status.");
+      return;
+    }
+
+    const accountTypeId = await getAccountTypeId(accountType.value);
+    if (accountTypeId == null) {
+      alert("Please select a valid account type.");
+      return;
+    }
+
+    // Numeric validation
+    const balance = Number.parseFloat(accountBalance.value);
+    if (Number.isNaN(balance) || balance < 0) {
+      alert("Please enter a valid account balance (0 or more).");
+      return;
+    }
+
+    const accountData = {
+      f_name: accountFirstName.value.trim(),
+      l_name: accountLastName.value.trim(),
+      date_birth: birth,
+      gender: genderId,
+      presented_id: presentedId,
+      id_no: accountIDNumber.value.trim(),
+      marital_status: maritalStatusId,
+      email: accountEmail.value.trim(),
+      contact_no: accountContact.value.trim(),
+      postal_code: accountPostal.value.trim(),
+      home: accountAddress.value.trim(),
+      city: accountCity.value.trim(),
+      acc_title: accountTitle.value.trim(),
+      acc_type: accountTypeId,
+      acc_balance: balance,
+      is_active: true
+    };
+
+    const newAccount = await createAccount(accountData);
+    if (newAccount) {
+      alert("Account added successfully!");
+      await refreshAddAccountContent();
+    }
+  });
+}
+
+async function refreshAddAccountContent() {
+  accountID.value = await generateAccountID();
+  accountFirstName.value = "";
+  accountLastName.value = "";
+  accountBirth.value = "";
+  accountGender.value = "";
+  accountIDType.value = "";
+  accountIDNumber.value = "";
+  accountMarital.value = "";
+  accountEmail.value = "";
+  accountContact.value = "";
+  accountPostal.value = "";
+  accountAddress.value = "";
+  accountCity.value = "";
+  accountTitle.value = "";
+  accountType.value = "";
+  accountBalance.value = "0";
+}

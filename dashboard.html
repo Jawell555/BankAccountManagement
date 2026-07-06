@@ -82,7 +82,7 @@
                     </div>
                     <div class="widget">
                         <h2>CURRENT ACCOUNTS</h2>
-                        <p id="current-amount">0</p>
+                        <p id="current-accounts">0</p>   
                     </div>
                     <div class="widget">
                         <h2>SAVINGS ACCOUNTS</h2>
@@ -117,38 +117,12 @@
                                 <th>Employee ID</th>
                                 <th>Employee Name</th>
                                 <th>Email</th>
-                                <th>ID Number</th>
-                                <th>Date</th>
                                 <th>Employee Type</th>
+                                <th>Date</th>
                             </tr>
                         </thead>
-                        <tbody id="transaction-table-body">
+                        <tbody id="dashboard-table-body">
                             <tr>
-                                <td>No data available</td>
-                                <td>No data available</td>
-                                <td>No data available</td>
-                                <td>No data available</td>
-                                <td>No data available</td>
-                                <td>No data available</td>
-                            </tr>
-                            <tr>
-                                <td>No data available</td>
-                                <td>No data available</td>
-                                <td>No data available</td>
-                                <td>No data available</td>
-                                <td>No data available</td>
-                                <td>No data available</td>
-                            </tr>
-                            <tr>
-                                <td>No data available</td>
-                                <td>No data available</td>
-                                <td>No data available</td>
-                                <td>No data available</td>
-                                <td>No data available</td>
-                                <td>No data available</td>
-                            </tr>
-                            <tr>
-                                <td>No data available</td>
                                 <td>No data available</td>
                                 <td>No data available</td>
                                 <td>No data available</td>
@@ -191,7 +165,6 @@
                             <th>Email</th>
                             <th>Contact Number</th>
                             <th>Date</th>
-                            <th>Status</th>
                             <th>Operations</th>
                         </tr>
                     </thead>
@@ -202,7 +175,6 @@
                             <td>john.doe@example.com</td>
                             <td>123-456-7890</td>
                             <td>2023-01-01</td>
-                            <td>Active</td>
                             <td>
                                 <button class="view-btn">View</button>
                                 <button class="edit-btn">Edit</button>
@@ -268,7 +240,7 @@
                         </div>
                         <div class="form-group">
                             <label for="employee-contact">Contact Number</label>
-                            <input type="text" id="employee-contact" name="employee-contact" value="09XXXXXXXXX"
+                            <input type="text" pattern "^09[0-9]{9}$" id="employee-contact" name="employee-contact" placeholder="09XXXXXXXXX"
                                 required>
                         </div>
                     </div>
@@ -295,17 +267,17 @@
                         <div class="form-group">
                             <label for="employee-education">Educational Attainment</label>
                             <input type="text" id="employee-education" name="employee-education"
-                                placeholder="Enter educational attainment..." required>
+                                placeholder="Enter educational attainment... (eg. BS Information Technology)" required>
                         </div>
                         <div class="form-group">
                             <label for="employee-experience">Work Experience</label>
                             <input type="text" id="employee-experience" name="employee-experience"
-                                placeholder="Enter year experience..." required>
+                                placeholder="Enter year experience... (eg. 2)" required>
                         </div>
                         <div class="form-group">
                             <label for="employee-title">Job Title</label>
                             <input type="text" id="employee-title" name="employee-title"
-                                placeholder="Enter job title..." required>
+                                placeholder="Enter job title... (eg. Bank Staff)" required>
                         </div>
                     </div>
                     <div class="details">
@@ -321,12 +293,12 @@
                         </div>
                         <div class="form-group">
                             <label for="employee-password">Default Password</label>
-                            <input type="text" id="employee-password" name="employee-password" value="EMP000000001"
+                            <input type="text" id="employee-password" name="employee-password" value="password"
                                 readonly>
                         </div>
                     </div>
                     <div class="submit-form">
-                        <button class="submit-btn" type="submit">Add Employee</button>
+                        <button class="submit-btn" type="submit" name="add-employee-form">Add Employee</button>
                     </div>
                 </form>
             </div>
@@ -356,8 +328,8 @@
                             <th>Name</th>
                             <th>Email</th>
                             <th>Contact Number</th>
+                            <th>Account Type</th>
                             <th>Date</th>
-                            <th>Status</th>
                             <th>Operations</th>
                         </tr>
                     </thead>
@@ -367,8 +339,8 @@
                             <td>John Doe</td>
                             <td>john.doe@example.com</td>
                             <td>123-456-7890</td>
+                            <td>Savings</td>
                             <td>2023-01-01</td>
-                            <td>Active</td>
                             <td>
                                 <button class="view-btn">View</button>
                                 <button class="edit-btn">Edit</button>
@@ -388,7 +360,7 @@
         <div class="content" id="add-accounts">
             <div class="add-account-header">
                 <h1>Add Accounts</h1>
-                <input type="text" id="account-id" name="account-id" value="ACC000000001" readonly>
+                <input type="text" id="account-id" name="account-id" value="ACC000001" readonly>
             </div>
             <div class="account-form">
                 <form id="add-account-form">
@@ -422,8 +394,8 @@
                             <select id="account-id-type" name="account-id-type" required>
                                 <option value="">Select ID Type</option>
                                 <option value="passport">Passport</option>
-                                <option value="driver-license">Driver's License</option>
-                                <option value="national-id">National ID</option>
+                                <option value="driver's license">Driver's License</option>
+                                <option value="national id">National ID</option>
                             </select>
                         </div>
                         <div class="form-group">
@@ -448,7 +420,7 @@
                         </div>
                         <div class="form-group">
                             <label for="account-contact">Contact Number</label>
-                            <input type="text" id="account-contact" name="account-contact" value="09XXXXXXXXX" required>
+                            <input type="text" id="account-contact" name="account-contact" placeholder="09XXXXXXXXX" required>
                         </div>
                     </div>
                     <div class="address">
@@ -491,7 +463,7 @@
                         </div>
                     </div>
                     <div class="submit-form">
-                        <button class="submit-btn" type="submit">Add Account</button>
+                        <button class="submit-btn" type="submit" name="add-account-form">Add Account</button>
                     </div>
                 </form>
             </div>
@@ -717,9 +689,9 @@
                     </div>
                 </div>
                 <div class="transfer-total">
-                    <label for="transfer-fee">Transfer Fee: <span id="transfer-fee-value">$0.00</span></label>
-                    <label for="transfer-total">Total Transfer Amount: <span
-                            id="transfer-total-value">$0.00</span></label>
+                    <h1>Transfer Fee: <span id="transfer-fee">$0.00</span></h1>
+                    <h1>Total Transfer Amount: <span
+                            id="transfer-total">$0.00</span></h1>
                     <div class="transfer-actions">
                         <button type="button" id="transfer-btn">Transfer</button>
                     </div>

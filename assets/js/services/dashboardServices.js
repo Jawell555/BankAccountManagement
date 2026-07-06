@@ -1,17 +1,343 @@
-import { supabase } from '../config/app.js';
+import { supabase as sb } from '../config/app.js';
 
-export async function getCurrentUserInfo() {
-    const { data, error } = await supabase.database.from('employees').select('*').where({ id: sessionStorage.getItem('user_id') }).single();
-    if (error) {
-        throw new Error(error.message);
-    }
-    return data;
+function currencyFormat(amount) {
+  return new Intl.NumberFormat('en-PH', {
+    style: 'currency',
+    currency: 'PHP',
+    minimumFractionDigits: 2,
+  }).format(amount);
 }
 
-export async function createAccount(userData) {
-    const { data, error } = await supabase.database.from('employees').insert([userData]);
-    if (error) {
-        throw new Error(error.message);
+function employeeIDFormat(id) {
+  const idStr = id.toString();
+  const prefix = 'EMP' + (idStr.length < 6 ? '0'.repeat(6 - idStr.length) : '');
+  return prefix + idStr;
+}
+//Sidebar
+
+export async function getProfileEmailAndName() {
+  const { data: authData, error: authError } = await sb.auth.getUser();
+
+  if (authError) {
+    console.error("getProfileEmailAndName auth:", authError.message);
+    return null;
+  }
+
+  const email = authData?.user?.email ?? null;
+  if (!email) {
+    console.error("getProfileEmailAndName: no logged-in user email");
+    return null;
+  }
+
+  const { data: row, error: fullNameError } = await sb
+    .from("employees_with_full_name")
+    .select("full_name")
+    .eq("email", email)
+    .maybeSingle();
+
+  if (fullNameError) {
+    console.error("getProfileEmailAndName query:", fullNameError.message);
+    return null;
+  }
+
+  return {
+    name: row?.full_name ?? "",
+    email
+  };
+}
+
+
+//Dashboard
+export async function loadDashboardStats() {
+  const { count: adminsCount, error: adminsErr } = await sb
+    .from("employees")
+    .select("*", { count: "exact", head: true })
+    .eq("employee_type", 2);
+
+  const { count: employeesCount, error: employeesErr } = await sb
+    .from("employees")
+    .select("*", { count: "exact", head: true })
+    .eq("employee_type", 1);
+
+  const { count: savingsCount, error: savingsErr } = await sb
+    .from("accounts")
+    .select("*", { count: "exact", head: true })
+    .eq("acc_type", 1);
+
+  const { count: currentCount, error: currentErr } = await sb
+    .from("accounts")
+    .select("*", { count: "exact", head: true })
+    .eq("acc_type", 2);
+
+  const { data: totalBalance, error: totalBalanceErr } = await sb.rpc('get_total_balance');
+
+  const { data: totalDeposit, error: totalDepositErr } = await sb.rpc('get_total_deposit');
+
+  const { data: totalWithdraw, error: totalWithdrawErr } = await sb.rpc('get_total_withdraw');
+
+  const { data: totalBankTransactions, error: totalBankTransactionsErr } = await sb.rpc('get_total_transactions');
+
+
+  if (totalBalanceErr) console.error("totalBalanceErr:", totalBalanceErr.message);
+  if (totalDepositErr) console.error("totalDepositErr:", totalDepositErr.message);
+  if (totalWithdrawErr) console.error("totalWithdrawErr:", totalWithdrawErr.message);
+  if (totalBankTransactionsErr) console.error("totalBankTransactionsErr:", totalBankTransactionsErr.message);
+  if (adminsErr) console.error("adminsErr:", adminsErr.message);
+  if (employeesErr) console.error("employeesErr:", employeesErr.message);
+  if (savingsErr) console.error("savingsErr:", savingsErr.message);
+  if (currentErr) console.error("currentErr:", currentErr.message);
+
+  return {
+    totalAdmins: adminsCount,
+    totalEmployees: employeesCount,
+    totalSavings: savingsCount,
+    totalCurrent: currentCount,
+    totalBankBalance: currencyFormat(totalBalance),
+    totalBankDeposit: currencyFormat(totalDeposit),
+    totalBankWithdraw: currencyFormat(totalWithdraw),
+    totalBankTransactions: currencyFormat(totalBankTransactions)
+  };
+}
+
+async function loadLatestEmployees() {
+  const tbody = document.getElementById("dashboard-table-body");
+  if (!tbody) return;
+
+  const { data, error } = await sb
+    .from("employees")
+    .select("id, first_name, last_name, email, employee_type, created_at")
+    .order("created_at", { ascending: false })
+    .limit(5);
+
+  if (error) {
+    console.error("loadLatestEmployees:", error.message);
+    return;
+  }
+
+  tbody.innerHTML = "";
+
+  for (const emp of (data ?? [])) {
+    const empType = await getEmployeeType(emp.employee_type);
+
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${employeeIDFormat(emp.id) ?? ""}</td>
+      <td>${emp.first_name ?? ""} ${emp.last_name ?? ""}</td>
+      <td>${emp.email ?? ""}</td>
+      <td>${empType}</td>
+      <td>${emp.created_at ? new Date(emp.created_at).toLocaleString() : ""}</td>
+    `;
+    tbody.appendChild(tr);
+  }
+}
+
+async function getEmployeeType(type_id) {
+  if (type_id == null) return "";
+
+  const { data, error } = await sb
+    .from("employee_type")
+    .select("emp_desc")
+    .eq("id", type_id)
+    .single();
+
+  if (error) {
+    console.error("getEmployeeType:", error.message);
+    return "";
+  }
+
+  return data?.emp_desc ?? "";
+}
+
+//call once loaded
+export async function initDashboardData() {
+  await loadDashboardStats();
+  await loadLatestEmployees();
+};
+
+//View Employee
+//ID For Search
+
+export function getNumberIDFromString(str) {
+  const s = String(str ?? "").trim().toUpperCase();
+
+  // must be EMP + digits only, e.g. EMP000001
+  if (!/^EMP\d+$/.test(s)) return null;
+
+  const n = Number.parseInt(s.slice(3), 10);
+  return Number.isNaN(n) ? null : n;
+}
+
+//Employee Description to Id
+export async function getEmployeeTypeId(emp_desc) {
+  const { data, error } = await sb
+    .from("employee_type")
+    .select("id")
+    .eq("emp_desc", emp_desc)
+    .maybeSingle();
+
+  if (error) {
+    console.error("getEmployeeTypeId:", error.message);
+    return null;
+  }
+
+  return data?.id ?? 0;
+}
+
+export async function getEmployeesTable() {
+  const tbody = document.getElementById("employee-table-body");
+  if (!tbody) return;
+
+  const { data, error } = await sb
+    .from("employees")
+    .select("id, first_name, last_name, email, contact_no, created_at")
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    console.error("getAllEmployeesTable:", error.message);
+    return;
+  }
+
+  tbody.innerHTML = "";
+
+  for (const emp of (data ?? [])) {
+    const empType = await getEmployeeType(emp.employee_type);
+
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${employeeIDFormat(emp.id) ?? ""}</td>
+      <td>${emp.first_name ?? ""} ${emp.last_name ?? ""}</td>
+      <td>${emp.email ?? ""}</td>
+      <td>${emp.contact_no ?? ""}</td>
+      <td>${emp.created_at ? new Date(emp.created_at).toLocaleString() : ""}</td>
+      <td>
+        <button class="view-btn">View</button>
+        <button class="edit-btn">Edit</button>
+        <button class="delete-btn">Delete</button>
+      </td>
+    `;
+    tbody.appendChild(tr);
+  }
+}
+
+export async function employeeFilter(emp, type) {
+  const tbody = document.getElementById("employee-table-body");
+  if (!tbody) return;
+
+  const keyword = (emp ?? "").trim();
+  const typeNum = await getEmployeeTypeId(type);
+
+  let query = sb
+    .from("employees_with_full_name")
+    .select("id, first_name, last_name, email, contact_no, employee_type, created_at, full_name")
+    .order("created_at", { ascending: false });
+
+  // type filter (0 = all)
+  if (typeNum !== 0) {
+    query = query.eq("employee_type", typeNum);
+  }
+
+  // search filter
+  if (keyword) {
+    const employeeID = getNumberIDFromString(keyword); // e.g. "EMP000123" -> 123
+
+    if (employeeID != null) {
+      // numeric ID search
+      query = query.or(
+        `id.eq.${employeeID}`
+      );
+    } else {
+      // text search only
+      query = query.or(
+        `full_name.ilike.%${keyword}%`
+      );
     }
-    return data;
+  }
+
+  const { data, error } = await query;
+
+  if (error) {
+    console.error("employeeFilter:", error.message);
+    return;
+  }
+
+  // render rows
+  tbody.innerHTML = "";
+  for (const empRow of data ?? []) {
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${employeeIDFormat(empRow.id)}</td>
+      <td>${empRow.first_name ?? ""} ${empRow.last_name ?? ""}</td>
+      <td>${empRow.email ?? ""}</td>
+      <td>${empRow.contact_no ?? ""}</td>
+      <td>${empRow.created_at ? new Date(empRow.created_at).toLocaleString() : ""}</td>
+      <td>
+        <button class="view-btn">View</button>
+        <button class="edit-btn">Edit</button>
+        <button class="delete-btn">Delete</button>
+      </td>
+    `;
+    tbody.appendChild(tr);
+  }
+}
+
+//Add Employee 
+export async function generateEmployeeID() {
+  const { data, error } = await sb
+    .from("employees")
+    .select("id")
+    .order("id", { descending: true })
+    .limit(1)
+    .maybeSingle();
+
+  if (error) {
+    console.error("generateEmployeeID:", error.message);
+    return null;
+  }
+
+  const lastID = data?.id ?? 0;
+  const newID = lastID + 1;
+  return employeeIDFormat(newID);
+}
+
+export async function createEmployee(payload) {
+  const { data, error } = await sb.functions.invoke("create-employee", {
+    body: payload
+  });
+
+  if (error) {
+    console.error("create-employee error:", error.message);
+    return null;
+  }
+
+  return data;
+}
+
+export async function getGenderID(gender_desc) {
+  const { data, error } = await sb
+    .from("genders")
+    .select("id")
+    .ilike("gender_desc", gender_desc)
+    .single();
+
+  if (error) {
+    console.error("getGenderID:", error.message);
+    return null;
+  }
+
+  return data?.id ?? null;
+}
+
+export async function getMaritalStatusID(status_desc) {
+  const { data, error } = await sb
+    .from("marital_status")
+    .select("id")
+    .ilike("marital_desc", status_desc)
+    .single();
+
+  if (error) {
+    console.error("getMaritalStatusID:", error.message);
+    return null;
+  }
+
+  return data?.id ?? null;
 }

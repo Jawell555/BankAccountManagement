@@ -450,7 +450,7 @@ body {
     padding: 0 50px 0 0;
 
     #employee-id,
-    #account-id #profile-employee-id {
+    #account-id, #profile-employee-id {
         font-size: 1.25rem;
         text-align: center;
     }
@@ -789,22 +789,21 @@ body {
         flex-direction: column;
         gap: 10px;
 
-        label[for="transfer-fee"],
-        label[for="transfer-total"] {
+        h1{
             font-size: 24px;
             color: #031B42;
             font-weight: 600;
             padding: 10px;
         }
 
-        #transfer-fee-value {
+        #transfer-fee {
             font-size: 24px;
             color: #FF2C2C;
             font-weight: bold;
             padding: 10px;
         }
 
-        #transfer-total-value {
+        #transfer-total {
             font-size: 26px;
             color: #031B42;
             font-weight: bold;
