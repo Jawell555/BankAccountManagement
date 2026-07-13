@@ -1,3 +1,26 @@
+import { getProfileEmailAndName } from '../services/dashboardServices.js';
+import { loadDashboardStats } from '../services/dashboardServices.js';
+import { initDashboardData } from '../services/dashboardServices.js';
+import { getEmployeesTable } from '../services/dashboardServices.js';
+import { employeeFilter, updateEmployeeStatusOff } from '../services/dashboardServices.js';
+import { employeeIDFormat, getEmployeeByID, getMaritalStatusDesc, getGenderDesc,getEmployeeType } from '../services/dashboardServices.js';
+import { generateEmployeeID } from '../services/dashboardServices.js';
+import { createEmployee } from '../services/dashboardServices.js';
+import { getEmployeeTypeId } from '../services/dashboardServices.js';
+import { getGenderID } from '../services/dashboardServices.js';
+import { getMaritalStatusID } from '../services/dashboardServices.js';
+import { getAccountsTable } from '../services/accountServices.js';
+import { accountsFilter } from '../services/accountServices.js';
+import {
+  generateAccountID,
+  getPresentedIDTypeID,
+  getAccountTypeId
+} from "../services/accountServices.js";
+import { createAccount } from "../services/accountServices.js";
+import { updateEmployee } from '../services/dashboardServices.js';
+
+
+
 const sb = window.supabaseClient;
 
 const menuItems = document.querySelectorAll('.menu-item[data-content]');
@@ -86,7 +109,6 @@ function updateDateTime() {
 updateDateTime();
 setInterval(updateDateTime, 1000);
 //LOAD SIDEBAR INFO
-import { getProfileEmailAndName } from '../services/dashboardServices.js';
 
 const sidebarNameEl = document.getElementById("current-username");
 const sidebarEmailEl = document.getElementById("current-email");
@@ -97,7 +119,7 @@ sidebarEmailEl.textContent = await getProfileEmailAndName().then(info => info.em
 
 //load dashboard stats
 
-import { loadDashboardStats } from '../services/dashboardServices.js';
+
 const totalAdminsEl = document.getElementById("total-admins");
 const totalEmployeesEl = document.getElementById("total-employees");
 const totalSavingsEl = document.getElementById("savings-accounts");
@@ -119,15 +141,13 @@ totalBankWithdrawEl.textContent = stats.totalBankWithdraw;
 totalBankTransactionsEl.textContent = stats.totalBankTransactions;
 
 
-import { initDashboardData } from '../services/dashboardServices.js';
+
 document.querySelector('[data-content="dashboard"]').addEventListener('click', async () => {
   await initDashboardData();
 });
 await initDashboardData();
 
 //View Employee
-import { getEmployeesTable } from '../services/dashboardServices.js';
-import { employeeFilter, updateEmployeeStatusOff } from '../services/dashboardServices.js';
 // Refresh Employee Table every operation clicked
 async function refreshEmployeeTable() {
   await getEmployeesTable();
@@ -170,7 +190,6 @@ const toggleModal = (modalType, action, employeeId = null) => {
 };
 
 // Global expose layer (maintaining your existing window API structure)
-import { getEmployeeByID, getMaritalStatusDesc, getGenderDesc,getEmployeeType } from '../services/dashboardServices.js';
 window.openViewModal = async (id) => {
   toggleModal('view', 'open', id);
 
@@ -200,7 +219,7 @@ window.openViewModal = async (id) => {
     };
 
     if (employee) {
-      viewFields.id.textContent = employee.id ?? "";
+      viewFields.id.textContent = await employeeIDFormat(employee.id) ?? "";
       viewFields.fName.textContent = employee.first_name ?? "";
       viewFields.lName.textContent = employee.last_name ?? "";
       viewFields.gender.textContent = await getGenderDesc(employee.gender) ?? "";
@@ -222,14 +241,87 @@ window.openViewModal = async (id) => {
       console.error("Employee data not found for ID:", employeeId);
     }
 
-  }catch (error) {
+  } catch (error) {
     console.error("Error fetching employee data:", error);
-  
-};
+  }
 };
 window.closeViewModal = () => toggleModal('view', 'close');
 
-window.openEditModal = (id) => toggleModal('edit', 'open', id);
+window.openEditModal = async (id) => {
+  toggleModal('edit', 'open', id);
+  
+  try{
+    const saveButton = document.getElementById('employee-edit-save');
+    console.log(`Fetching data for employee view layout: ${id}`);
+    const employee = await getEmployeeByID(id);
+    console.log("Viewing employee:", employee);
+
+    const viewFields = {
+      id: document.getElementById('ved-id'),
+      first_name: document.getElementById('ved-fname'),
+      last_name: document.getElementById('ved-lname'),
+      gender: document.getElementById('ved-gender'),
+      date_birth: document.getElementById('ved-birth'),
+      marital_status: document.getElementById('ved-marital'),
+      email: document.getElementById('ved-email'),
+      contact_no: document.getElementById('ved-contact'),
+      home: document.getElementById('ved-address'),
+      city: document.getElementById('ved-city'),
+      postal_code: document.getElementById('ved-postal'),
+      attainment: document.getElementById('ved-education'),
+      experience: document.getElementById('ved-experience'),
+      job_title: document.getElementById('ved-title'),
+      employee_type: document.getElementById('ved-type'),
+      created_at: document.getElementById('ved-hire-date'),
+      updated_at: document.getElementById('ved-date-updated')
+    };
+
+    if (employee) {
+      viewFields.id.value = await employeeIDFormat(employee.id) ?? "";
+      viewFields.first_name.value = employee.first_name ?? "";
+      viewFields.last_name.value = employee.last_name ?? "";
+      viewFields.gender.value = await getGenderDesc(employee.gender) ?? "";
+      viewFields.date_birth.value = employee.date_birth ? new Date(employee.date_birth).toLocaleDateString() : "";
+      viewFields.marital_status.value = await getMaritalStatusDesc(employee.marital_status) ?? "";
+      viewFields.email.value = employee.email ?? "";
+      viewFields.contact_no.value = employee.contact_no ?? "";
+      viewFields.home.value = employee.home ?? "";
+      viewFields.city.value = employee.city ?? "";
+      viewFields.postal_code.value = employee.postal_code ?? "";
+      viewFields.attainment.value = employee.attainment ?? "";
+      viewFields.experience.value = employee.experience ?? "";
+      viewFields.job_title.value = employee.job_title ?? "";
+      viewFields.employee_type.value = await getEmployeeType(employee.employee_type) ?? "";
+      viewFields.created_at.value = employee.created_at ? new Date(employee.created_at).toLocaleString() : "";
+      viewFields.updated_at.value = employee.updated_at ? new Date(employee.updated_at).toLocaleString() : "";
+    }
+    else {
+      console.error("Employee data not found for ID:", employeeId);
+    }
+    
+    saveButton.onclick = async () => {
+      const updatedEmployeeData = {
+        marital_status: await getMaritalStatusID(viewFields.marital_status.value),
+        email: viewFields.email.value.trim(),
+        contact_no: viewFields.contact_no.value.trim(),
+        city: viewFields.city.value.trim(),
+        postal_code: viewFields.postal_code.value.trim(),
+        home: viewFields.home.value.trim(),
+        job_title: viewFields.job_title.value.trim(),
+        employee_type: await getEmployeeTypeId(viewFields.employee_type.value),
+        updated_at: new Date().toISOString()
+      };
+
+      await updateEmployee(employee.id, updatedEmployeeData);
+      closeEditModal();
+      await refreshEmployeeTable();
+    }
+
+  } catch (error) {
+    console.error("Error fetching employee data:", error);
+  }
+};
+
 window.closeEditModal = () => toggleModal('edit', 'close');
 
 window.openDeleteModal = (id) => toggleModal('delete', 'open', id);
@@ -255,8 +347,6 @@ window.confirmDeleteEmployee = async () => {
 };
 
 //Add Employee
-import { generateEmployeeID } from '../services/dashboardServices.js';
-import { createEmployee } from '../services/dashboardServices.js';
 
 const employeeID = document.getElementById('employee-id');
 const employeeFirstName = document.getElementById('employee-first-name');
@@ -279,9 +369,6 @@ const employeeUsername = document.getElementById('employee-username');
 const employeeType = document.getElementById('employee-type');
 const employeePassword = document.getElementById('employee-password');
 
-import { getEmployeeTypeId } from '../services/dashboardServices.js';
-import { getGenderID } from '../services/dashboardServices.js';
-import { getMaritalStatusID } from '../services/dashboardServices.js';
 
 document.querySelector('[type="submit"][name="add-employee-form"]').addEventListener('click', async (event) => {
   event.preventDefault();
@@ -338,8 +425,6 @@ async function refreshAddEmployeeContent() {
 }
 
 //View Accounts
-import { getAccountsTable } from '../services/accountServices.js';
-import { accountsFilter } from '../services/accountServices.js';
 
 let accountsTablesLoaded = false;
 document.querySelector('[data-content="view-accounts"]').addEventListener('click', async () => {
@@ -354,15 +439,6 @@ document.getElementById('account-filter-btn').addEventListener('click', async (e
   const type = document.getElementById('account-type-filter').value;
   await accountsFilter(keyword, type);
 });
-
-// Add Account
-import {
-  generateAccountID,
-  getPresentedIDTypeID,
-  getAccountTypeId
-} from "../services/accountServices.js";
-import { createAccount } from "../services/accountServices.js";
-
 
 // Form + inputs
 const addAccountForm = document.getElementById("add-account-form"); // <- form element

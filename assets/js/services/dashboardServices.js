@@ -1,5 +1,20 @@
 import { supabase as sb } from '../config/app.js';
 
+export async function isUserActive(username) {
+  const { data, error } = await sb
+    .from("employees")
+    .select("is_active")
+    .eq("email", username)
+    .maybeSingle();
+
+  if (error) {
+    console.error("isUserActive:", error.message);
+    return false;
+  }
+
+  return data?.is_active ?? false;
+}
+
 function currencyFormat(amount) {
   return new Intl.NumberFormat('en-PH', {
     style: 'currency',
@@ -8,7 +23,7 @@ function currencyFormat(amount) {
   }).format(amount);
 }
 
-function employeeIDFormat(id) {
+export function employeeIDFormat(id) {
   const idStr = id.toString();
   const prefix = 'EMP' + (idStr.length < 6 ? '0'.repeat(6 - idStr.length) : '');
   return prefix + idStr;
@@ -411,6 +426,22 @@ export async function getEmployeeByID(employeeID) {
 
   if (error) {
     console.error("getEmployeeByID:", error.message);
+    return null;
+  }
+
+  return data;
+}
+
+//Update Employee
+export async function updateEmployee(employeeID, updatedData) {
+
+  const { data, error } = await sb
+    .from("employees")
+    .update(updatedData)
+    .eq("id", employeeID);
+
+  if (error) {
+    console.error("updateEmployee:", error.message);
     return null;
   }
 

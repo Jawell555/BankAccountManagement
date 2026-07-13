@@ -253,19 +253,26 @@
                             <label for="ved-postal"><strong>Postal Code:</strong></label>
                             <input type="text" id="ved-postal" value="Postal Code" required>
                             <label for="ved-education"><strong>Educational Attainment:</strong></label>
-                            <input type="text" id="ved-education" value="Educational Attainment" required>
+                            <input type="text" id="ved-education" value="Educational Attainment" readonly>
                             <label for="ved-experience"><strong>Work Experience:</strong></label>
-                            <input type="text" id="ved-experience" value="Work Experience" required>
+                            <input type="text" id="ved-experience" value="Work Experience" readonly>
                             <label for="ved-title"><strong>Job Title:</strong></label>
                             <input type="text" id="ved-title" value="Job Title" required>
                             <label for="ved-type"><strong>Employee Type:</strong></label>
-                            <input type="text" id="ved-type" value="Employee Type" required>
+                            <select id="ved-type" required>
+                                <option value="Employee">Employee</option>
+                                <option value="Admin">Admin</option>
+                            </select>
                             <label for="ved-hire-date"><strong>Date Hired:</strong></label>
-                            <input type="text" id="ved-hire-date" value="Date Hired" required>
-                            <label for="ved-date-created"><strong>Date Created:</strong></label>
-                            <input type="text" id="ved-date-created" value="Date Created" readonly>
+                            <input type="text" id="ved-hire-date" value="Date Hired" readonly>
+                            <label for="ved-date-updated"><strong>Date Updated:</strong></label>
+                            <input type="text" id="ved-date-updated" value="Date Updated" readonly>
                         </div>
+                        
                     </div>
+                    <div class="modal-actions">                            
+                            <button class="save-btn" id="employee-edit-save">Save Changes</button>
+                        </div>
                 </div>
             </div>
             <div class="modal" id="employee-delete-modal">

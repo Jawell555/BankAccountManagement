@@ -1,9 +1,16 @@
 import { supabase as sb } from '../config/app.js';
+import { isUserActive } from './dashboardServices.js';
+
+const passwordField = document.getElementById('password');
 
 export async function validateLogin(username, password) {
 
     if (!username || !password) {
         alert('Please enter both username and password.');
+        return false;
+    }
+    if (!(await isUserActive(username))) {
+        alert('User is not active.');
         return false;
     }
 

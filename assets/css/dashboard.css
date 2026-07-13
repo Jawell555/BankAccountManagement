@@ -894,7 +894,7 @@ body {
 
 .modal .modal-content {
     background-color: #fefefe;
-    margin: 5% auto;
+    margin: 2.5% auto;
     padding: 20px;
     border: 1px solid #888;
     width: 40%;
@@ -989,6 +989,10 @@ body {
         border-radius: 4px;
         font-size: 14px;
         width: 300px;
+    }
+    
+    input[readonly] {
+        background-color: #cacaca;
     }
 
     select {
