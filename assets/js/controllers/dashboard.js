@@ -18,7 +18,7 @@ import {
   getAccountById
 } from "../services/accountServices.js";
 import { createAccount } from "../services/accountServices.js";
-import { updateEmployee, currencyFormat} from '../services/dashboardServices.js';
+import { updateEmployee, currencyFormat } from '../services/dashboardServices.js';
 
 import { supabase as sb } from '../config/app.js';
 
@@ -108,12 +108,13 @@ function updateDateTime() {
 updateDateTime();
 setInterval(updateDateTime, 1000);
 //LOAD SIDEBAR INFO
+const profile = await getProfileInfo();
 
 const sidebarNameEl = document.getElementById("current-username");
 const sidebarEmailEl = document.getElementById("current-email");
 
-sidebarNameEl.textContent = await getProfileInfo().then(info => info.name ?? "Loading...");
-sidebarEmailEl.textContent = await getProfileInfo().then(info => info.email ?? "Loading...");
+sidebarNameEl.textContent = profile.name ?? "Loading...";
+sidebarEmailEl.textContent = profile.email ?? "Loading...";
 
 
 //load dashboard stats
@@ -130,20 +131,25 @@ const totalBankTransactionsEl = document.getElementById("transacted-total");
 
 const stats = await loadDashboardStats();
 
-totalAdminsEl.textContent = stats.totalAdmins;
-totalEmployeesEl.textContent = stats.totalEmployees;
-totalSavingsEl.textContent = stats.totalSavings;
-totalCurrentEl.textContent = stats.totalCurrent;
-totalBankBalanceEl.textContent = stats.totalBankBalance;
-totalBankDepositEl.textContent = stats.totalBankDeposit;
-totalBankWithdrawEl.textContent = stats.totalBankWithdraw;
-totalBankTransactionsEl.textContent = stats.totalBankTransactions;
-
+async function initDasboardStats() {
+  const stats = await loadDashboardStats();
+  totalAdminsEl.textContent = stats.totalAdmins;
+  totalEmployeesEl.textContent = stats.totalEmployees;
+  totalSavingsEl.textContent = stats.totalSavings;
+  totalCurrentEl.textContent = stats.totalCurrent;
+  totalBankBalanceEl.textContent = stats.totalBankBalance;
+  totalBankDepositEl.textContent = stats.totalBankDeposit;
+  totalBankWithdrawEl.textContent = stats.totalBankWithdraw;
+  totalBankTransactionsEl.textContent = stats.totalBankTransactions;
+}
+await initDashboardData();
+await initDasboardStats();
 
 document.querySelector('[data-content="dashboard"]').addEventListener('click', async () => {
   await initDashboardData();
+  await initDasboardStats();
 });
-await initDashboardData();
+
 
 //View Employee
 // Refresh Employee Table every operation clicked
@@ -591,9 +597,9 @@ async function refreshAddAccountContent() {
   accountType.value = "";
   accountBalance.value = "0";
 }
-import {getFilteredTransactions, generateRefID, getTransactionTypeId, insertTransaction} from '../services/transactionServices.js';
+import { getFilteredTransactions, generateRefID, getTransactionTypeId, insertTransaction } from '../services/transactionServices.js';
 
-import { updateBalanceDeposit } from '../services/accountServices.js';
+import { updateBalanceDeposit, updateBalanceWithdraw } from '../services/accountServices.js';
 
 // Account Operation (Deposit)
 const depositSearch = document.getElementById("deposit-account-search");
@@ -612,11 +618,9 @@ const depositDate = document.getElementById("deposit-live-datetime");
 const depositAmount = document.getElementById("deposit-amount");
 const depositorName = document.getElementById("deposit-depositor-name");
 
-const depositBtn = document.getElementById("deposit-btn");
-
 document.querySelector('[data-content="deposit-operations"]').addEventListener('click', async () => {
-  const newRefID = await generateRefID();
-  depositReference.value = newRefID;
+  await refreshDepositContent();
+  await initializeDepositForm()
 });
 
 document.getElementById("deposit-search-btn").addEventListener("click", async (event) => {
@@ -644,7 +648,7 @@ depositForm.addEventListener("submit", async (event) => {
     alert("Please search for an account first.");
     return;
   }
-const account  = await getAccountById(currentAccountNumber);
+  const account = await getAccountById(currentAccountNumber);
   if (!account) {
     alert("Account not found!");
     return;
@@ -658,21 +662,40 @@ const account  = await getAccountById(currentAccountNumber);
     date_time: new Date().toISOString(),
     amount: parseFloat(depositAmount.value),
     transac_with: depositorName.value.trim(),
-    processed_by: await getProfileInfo().then(info => info.id ?? null),
+    processed_by: profile.id ?? null,
   };
 
   const result = await insertTransaction(depositData);
   if (result) {
     alert("Deposit successful!");
     await updateBalanceDeposit(account.id, depositData.amount);
-    refreshDepositContent();
+    await refreshDepositContent();
   }
 });
 
-async function initdepositReference() {
-  depositReference.value = await generateRefID();
+async function initializeDepositForm() {
+  const referenceInput = document.getElementById("deposit-reference");
+  const submitButton = depositForm.querySelector('button[type="submit"]');
+
+  referenceInput.value = "";
+  referenceInput.placeholder = "Generating reference...";
+  submitButton.disabled = true;
+
+  try {
+    const newRefID = await generateRefID();
+
+    // Ensures the input was not replaced while waiting.
+    if (referenceInput.isConnected) {
+      referenceInput.value = newRefID;
+    }
+  } catch (error) {
+    console.error("Could not generate deposit reference:", error);
+    alert("Could not generate a deposit reference.");
+  } finally {
+    submitButton.disabled = false;
+  }
 }
-initdepositReference();
+
 async function refreshDepositContent() {
   depositSearch.value = "";
   depositAccountTitle.value = "";
@@ -686,6 +709,336 @@ async function refreshDepositContent() {
   depositReference.value = await generateRefID();
 }
 
+// Account Operation (Withdraw)
+const withdrawSearch = document.getElementById("withdraw-account-search");
+const withdrawForm = document.getElementById("withdraw-form");
+
+const withdrawAccountTitle = document.getElementById("withdraw-account-title");
+const withdrawAccountName = document.getElementById("withdraw-account-name");
+const withdrawAccountNumber = document.getElementById("withdraw-account-number");
+const withdrawAccountBalance = document.getElementById("withdraw-account-balance");
+const withdrawAccountStatus = document.getElementById("withdraw-account-status");
+const withdrawAccountType = document.getElementById("withdraw-account-type");
+
+const withdrawReference = document.getElementById("withdraw-reference");
+const withdrawType = document.getElementById("withdraw-type");
+const withdrawDate = document.getElementById("withdraw-live-datetime");
+const withdrawAmount = document.getElementById("withdraw-amount");
+const withdraworName = document.getElementById("withdraw-withdrawer-name");
+
+document.querySelector('[data-content="withdraw-operations"]').addEventListener('click', async () => {
+  await refreshWithdrawContent();
+  await initializeWithdrawForm();
+});
+
+document.getElementById("withdraw-search-btn").addEventListener("click", async (event) => {
+  event.preventDefault();
+  const accountNumber = withdrawSearch.value.trim();
+
+  const account = await getAccountById(accountNumber);
+  if (account) {
+    withdrawAccountTitle.value = account.acc_title;
+    withdrawAccountName.value = `${account.f_name} ${account.l_name}`;
+    withdrawAccountNumber.value = accountIDFormat(account.id);
+    withdrawAccountBalance.value = currencyFormat(account.acc_balance);
+    withdrawAccountStatus.value = account.is_active ? "Active" : "Inactive";
+    withdrawAccountType.value = account.acc_type;
+  } else {
+    alert("Account not found!");
+  }
+});
+
+withdrawForm.addEventListener("submit", async (event) => {
+  event.preventDefault();
+  const currentAccountNumber = withdrawAccountNumber.value;
+
+  if (!currentAccountNumber) {
+    alert("Please search for an account first.");
+    return;
+  }
+  const account = await getAccountById(currentAccountNumber);
+  if (!account) {
+    alert("Account not found!");
+    return;
+  }
+  const withdrawData = {
+    acc_id: account.id,
+    acc_fname: account.f_name,
+    acc_lname: account.l_name,
+    acc_name: `${account.f_name} ${account.l_name}`,
+    transac_type: await getTransactionTypeId(withdrawType.value),
+    date_time: new Date().toISOString(),
+    amount: parseFloat(withdrawAmount.value),
+    transac_with: withdraworName.value.trim(),
+    processed_by: profile.id ?? null,
+  };
+
+  const result = await insertTransaction(withdrawData);
+  if (result) {
+    alert("Withdrawal successful!");
+    await updateBalanceWithdraw(account.id, withdrawData.amount);
+    await refreshWithdrawContent();
+  }
+});
+
+async function initializeWithdrawForm() {
+  const referenceInput = document.getElementById("withdraw-reference");
+  const submitButton = withdrawForm.querySelector('button[type="submit"]');
+
+  referenceInput.value = "";
+  referenceInput.placeholder = "Generating reference...";
+  submitButton.disabled = true;
+
+  try {
+    const newRefID = await generateRefID();
+
+    // Ensures the input was not replaced while waiting.
+    if (referenceInput.isConnected) {
+      referenceInput.value = newRefID;
+    }
+  } catch (error) {
+    console.error("Could not generate withdraw reference:", error);
+    alert("Could not generate a withdraw reference.");
+  } finally {
+    submitButton.disabled = false;
+  }
+}
+
+async function refreshWithdrawContent() {
+  withdrawSearch.value = "";
+  withdrawAccountTitle.value = "";
+  withdrawAccountName.value = "";
+  withdrawAccountNumber.value = "";
+  withdrawAccountBalance.value = "";
+  withdrawAccountStatus.value = "";
+  withdrawAccountType.value = "";
+  withdrawAmount.value = "";
+  withdraworName.value = "";
+  withdrawReference.value = await generateRefID();
+}
+
+import { formatExternalBankID, getExternalAccountById, getExternalBankIDFromString } from '../services/dummyExternalServices.js';
+import { getTellerTransferFee } from '../services/transactionServices.js';
+
+const senderSearch = document.getElementById("sender-account-search");
+const receiverSearch = document.getElementById("receiver-account-search");
+
+const transferForm = document.getElementById("transfer-form");
+
+const senderAccountTitle = document.getElementById("sender-account-title");
+const senderAccountName = document.getElementById("sender-account-name");
+const senderAccountNumber = document.getElementById("sender-account-number");
+const senderAccountBalance = document.getElementById("sender-account-balance");
+const senderAccountStatus = document.getElementById("sender-account-status");
+
+const receiverAccountTitle = document.getElementById("receiver-account-title");
+const receiverAccountName = document.getElementById("receiver-account-name");
+const receiverAccountNumber = document.getElementById("receiver-account-number");
+const receiverAccountBalance = document.getElementById("receiver-account-balance");
+const receiverAccountStatus = document.getElementById("receiver-account-status");
+
+const transferReference = document.getElementById("transfer-reference");
+const transferType = document.getElementById("transfer-type");
+const transferDate = document.getElementById("transfer-live-datetime");
+const transferAmount = document.getElementById("transfer-amount");
+const transferFee = document.getElementById("transfer-fee");
+const transferTotal = document.getElementById("transfer-total");
+
+// Keep searched accounts available globally
+let senderAccount = null;
+let receiverAccount = null;
+
+// ===================================
+// Generate Reference Number
+// ===================================
+
+document.querySelector('[data-content="transfer-operations"]').addEventListener("click", async () => {
+  await refreshTransferContent();
+  await initializeTransferForm();
+});
+
+// ===================================
+// Update Transfer Fee & Total
+// ===================================
+
+function updateTransferTotals() {
+  const amount = parseFloat(transferAmount.value) || 0;
+  if (amount < 0) {
+    transferFee.textContent = currencyFormat(0);
+    transferTotal.textContent = currencyFormat(0);
+    return;
+  }
+  if (transferType.value === "internal transfer") {
+    transferFee.textContent = currencyFormat(0);
+    transferTotal.textContent = currencyFormat(amount);
+  } else {
+    const fee = getTellerTransferFee(amount);
+    transferFee.textContent = currencyFormat(fee);
+    transferTotal.textContent = currencyFormat(amount + fee);
+  }
+}
+
+transferType.addEventListener("change", updateTransferTotals);
+transferAmount.addEventListener("input", updateTransferTotals);
+
+// ===================================
+// Search Accounts
+// ===================================
+
+document.getElementById("transfer-search-btn").addEventListener("click", async (event) => {
+  event.preventDefault();
+
+  const senderAccNumber = senderSearch.value.trim();
+  const receiverAccNumber = receiverSearch.value.trim();
+
+  senderAccount = null;
+  receiverAccount = null;
+
+  senderAccount = await getAccountById(senderAccNumber);
+
+  if (transferType.value === "internal transfer") {
+    receiverAccount = await getAccountById(receiverAccNumber);
+  } else {
+    receiverAccount = await getExternalAccountById(receiverAccNumber);
+  }
+
+  if (!senderAccount) {
+    alert("Sender account not found!");
+    return;
+  }
+  if (!receiverAccount) {
+    alert("Receiver account not found!");
+    return;
+  }
+  if (senderAccount.id === receiverAccount.id) {
+    alert("Sender and receiver accounts cannot be the same.");
+    return;
+  }
+
+  // Sender
+  senderAccountTitle.value = senderAccount.acc_title;
+  senderAccountName.value = `${senderAccount.f_name} ${senderAccount.l_name}`;
+  senderAccountNumber.value = accountIDFormat(senderAccount.id);
+  senderAccountBalance.value = currencyFormat(senderAccount.acc_balance);
+  senderAccountStatus.value = senderAccount.is_active ? "Active" : "Inactive";
+
+  // Receiver
+  if (transferType.value === "internal transfer") {
+    receiverAccountTitle.value = receiverAccount.acc_title;
+    receiverAccountName.value = `${receiverAccount.f_name} ${receiverAccount.l_name}`;
+    receiverAccountNumber.value = accountIDFormat(receiverAccount.id);
+    receiverAccountBalance.value = currencyFormat(receiverAccount.acc_balance);
+    receiverAccountStatus.value = receiverAccount.is_active ? "Active" : "Inactive";
+  } else {
+    receiverAccountTitle.value = receiverAccount.name;
+    receiverAccountName.value = receiverAccount.name;
+    receiverAccountNumber.value = formatExternalBankID(receiverAccount.id);
+    receiverAccountBalance.value = "-";
+    receiverAccountStatus.value = "-";
+  }
+});
+
+// ===================================
+// Submit Transfer
+// ===================================
+
+transferForm.addEventListener("submit", async (event) => {
+  event.preventDefault();
+
+  if (!senderAccount) {
+    alert("Please search for the sender account first.");
+    return;
+  }
+
+  if (!receiverAccount) {
+    alert("Please search for the receiver account first.");
+    return;
+  }
+
+  const transferData = {
+    acc_id: senderAccount.id,
+    acc_fname: senderAccount.f_name,
+    acc_lname: senderAccount.l_name,
+    acc_name: `${senderAccount.f_name} ${senderAccount.l_name}`,
+    transac_type: await getTransactionTypeId(transferType.value),
+    date_time: new Date().toISOString(),
+    amount: parseFloat(transferAmount.value) || 0,
+    transac_with: receiverAccount.id,
+    processed_by: profile?.id ?? null,
+  };
+
+  const { data, error } = await sb.functions.invoke("transfer-funds", {
+    body: {
+      senderAccountId: senderAccount.id,
+      receiverAccountId: receiverAccount.id,
+      amount: transferAmount.value,
+    },
+  });
+
+  if (error) {
+    const response = await error.context?.json().catch(() => null);
+
+    console.error("Transfer failed:", {
+      message: error.message,
+      response,
+    });
+
+    alert(response?.error ?? error.message);
+    return;
+  }
+
+  console.log("Transfer succeeded:", data);
+  alert("Transfer successful!");
+  const result = await insertTransaction(transferData);
+
+  await refreshTransferContent();
+
+  senderAccount = null;
+  receiverAccount = null;
+});
+
+async function initializeTransferForm() {
+  const referenceInput = document.getElementById("transfer-reference");
+  const submitButton = transferForm.querySelector('button[type="submit"]');
+
+  referenceInput.value = "";
+  referenceInput.placeholder = "Generating reference...";
+  submitButton.disabled = true;
+
+  try {
+    const newRefID = await generateRefID();
+
+    // Ensures the input was not replaced while waiting.
+    if (referenceInput.isConnected) {
+      referenceInput.value = newRefID;
+    }
+  } catch (error) {
+    console.error("Could not generate transfer reference:", error);
+    alert("Could not generate a transfer reference.");
+  } finally {
+    submitButton.disabled = false;
+  }
+}
+
+async function refreshTransferContent() {
+  senderSearch.value = "";
+  receiverSearch.value = "";
+
+  senderAccountTitle.value = "";
+  senderAccountName.value = "";
+  senderAccountNumber.value = "";
+  senderAccountBalance.value = "";
+  senderAccountStatus.value = "";
+
+  receiverAccountTitle.value = "";
+  receiverAccountName.value = "";
+  receiverAccountNumber.value = "";
+  receiverAccountBalance.value = "";
+  receiverAccountStatus.value = "";
+
+  transferAmount.value = "";
+  transferReference.value = await generateRefID();
+}
 
 // Bank Balance
 export function getTransactionFilterValues() {
@@ -710,7 +1063,7 @@ document.querySelector('[data-content="bank-balance"]').addEventListener('click'
   }
 });
 
-document.getElementById('account-filter-btn').addEventListener('click', async (event) => {
+document.getElementById('transaction-filter-btn').addEventListener('click', async (event) => {
   const { keyword, type, startDate, endDate } = getTransactionFilterValues();
   await getFilteredTransactions(keyword, type, startDate, endDate, 1); // Reset to page 1 after filter is applied
 });

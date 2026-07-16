@@ -4,7 +4,7 @@ import { getCurrentAccountFilterValues, refreshAccountsTable } from '../controll
 
 export function accountIDFormat(id) {
   const idStr = id.toString();
-  const prefix = 'ACC' + (idStr.length < 6 ? '0'.repeat(6 - idStr.length) : '');
+  const prefix = 'ACC' + (idStr.length < 12 ? '0'.repeat(12 - idStr.length) : '');
   return prefix + idStr;
 }
 
@@ -182,7 +182,7 @@ export async function generateAccountID() {
   const { data, error } = await sb
     .from("accounts")
     .select("id")
-    .order("id", { descending: true })
+    .order("id", { ascending: false })
     .limit(1)
     .maybeSingle();
 
@@ -192,7 +192,8 @@ export async function generateAccountID() {
   }
 
   const lastID = data?.id ?? 0;
-  return `ACC${(lastID + 1).toString().padStart(6, "0")}`;
+  const newID = lastID + 1;
+  return accountIDFormat(newID);
 }
 
 export async function getAccountTypeId(typeName) {
@@ -398,13 +399,13 @@ export async function createAccount(accountData) {
 
     const transactionData = {
       acc_id: newAccount.id,
-      acc_f_name: newAccount.f_name,
-      acc_l_name: newAccount.l_name,
+      acc_fname: newAccount.f_name,
+      acc_lname: newAccount.l_name,
       acc_name: `${newAccount.f_name} ${newAccount.l_name}`,
       transac_with: "System",
       transac_type: 1,
       date_time: newAccount.created_at,
-      amount: newAccount.initial_deposit,
+      amount: parseFloat(newAccount.acc_balance),
       processed_by: await getProfileInfo().then(info => info.id ?? null),
     };
     await insertTransaction(transactionData);
@@ -534,4 +535,141 @@ export async function updateBalanceDeposit(accountID, amount) {
   }
 
   return data;
+}
+
+export async function updateBalanceWithdraw(accountID, amount) {
+  const accID =
+    typeof accountID === "number"
+      ? accountID
+      : getAccNumberIDFromString(accountID);
+
+  const withdrawAmount = Number(amount);
+
+  if (accID == null) {
+    console.error("Invalid account ID format:", accountID);
+    return null;
+  }
+
+  if (!Number.isFinite(withdrawAmount) || withdrawAmount <= 0) {
+    console.error("Invalid withdraw amount:", amount);
+    return null;
+  }
+
+  const { data: account, error: getError } = await sb
+    .from("accounts")
+    .select("acc_balance")
+    .eq("id", accID)
+    .single();
+
+  if (getError) {
+    console.error("Could not get account balance:", getError.message);
+    return null;
+  }
+
+  const newBalance = Number(account.acc_balance ?? 0) - withdrawAmount;
+  if (newBalance < 0) {
+    console.error("Insufficient funds for withdrawal. Current balance:", account.acc_balance);
+    return null;
+  }
+  const { data, error: updateError } = await sb
+    .from("accounts")
+    .update({
+      acc_balance: newBalance
+    })
+    .eq("id", accID)
+    .select()
+    .single();
+
+  if (updateError) {
+    console.error("updateBalanceDeposit:", updateError.message);
+    return null;
+  }
+
+  return data;
+}
+
+export async function updateBalanceTransfer(senderAccountID, receiverAccountID, amount) {
+  const senderID =
+    typeof senderAccountID === "number"
+      ? senderAccountID
+      : getAccNumberIDFromString(senderAccountID);
+
+  const receiverID =
+    typeof receiverAccountID === "number"
+      ? receiverAccountID
+      : getAccNumberIDFromString(receiverAccountID);
+
+  const transferAmount = Number(amount);
+
+  if (senderID == null || receiverID == null) {
+    console.error("Invalid account ID format:", senderAccountID, receiverAccountID);
+    return null;
+  }
+
+  if (!Number.isFinite(transferAmount) || transferAmount <= 0) {
+    console.error("Invalid transfer amount:", amount);
+    return null;
+  }
+
+  // Update sender's balance
+  const { data: senderAccount, error: getSenderError } = await sb
+    .from("accounts")
+    .select("acc_balance")
+    .eq("id", senderID)
+    .single();
+
+  if (getSenderError) {
+    console.error("Could not get sender account balance:", getSenderError.message);
+    return null;
+  }
+
+  const newSenderBalance = Number(senderAccount.acc_balance ?? 0) - transferAmount;
+  if (newSenderBalance < 0) {
+    console.error("Insufficient funds for transfer. Current balance:", senderAccount.acc_balance);
+    return null;
+  }
+
+  const { data: updatedSender, error: updateSenderError } = await sb
+    .from("accounts")
+    .update({
+      acc_balance: newSenderBalance
+    })
+    .eq("id", senderID)
+    .select()
+    .single();
+
+  if (updateSenderError) {
+    console.error("updateBalanceTransfer (sender):", updateSenderError.message);
+    return null;
+  }
+
+  // Update receiver's balance
+  const { data: receiverAccount, error: getReceiverError } = await sb
+    .from("accounts")
+    .select("acc_balance")
+    .eq("id", receiverID)
+    .single();
+
+  if (getReceiverError) {
+    console.error("Could not get receiver account balance:", getReceiverError.message);
+    return null;
+  }
+
+  const newReceiverBalance = Number(receiverAccount.acc_balance ?? 0) + transferAmount;
+
+  const { data: updatedReceiver, error: updateReceiverError } = await sb
+    .from("accounts")
+    .update({
+      acc_balance: newReceiverBalance
+    })
+    .eq("id", receiverID)
+    .select()
+    .single();
+
+  if (updateReceiverError) {
+    console.error("updateBalanceTransfer (receiver):", updateReceiverError.message);
+    return null;
+  }
+
+  return { updatedSender, updatedReceiver };
 }

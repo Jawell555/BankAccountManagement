@@ -341,7 +341,7 @@
                         </div>
                         <div class="form-group">
                             <label for="employee-contact">Contact Number</label>
-                            <input type="text" pattern "^09[0-9]{9}$" id="employee-contact" name="employee-contact"
+                            <input type="text" pattern="^09[0-9]{9}$" id="employee-contact" name="employee-contact"
                                 placeholder="09XXXXXXXXX" required>
                         </div>
                     </div>
@@ -435,19 +435,6 @@
                         </tr>
                     </thead>
                     <tbody id="account-table-body">
-                        <tr>
-                            <td>ACC001</td>
-                            <td>John Doe</td>
-                            <td>john.doe@example.com</td>
-                            <td>123-456-7890</td>
-                            <td>Savings</td>
-                            <td>2023-01-01</td>
-                            <td>
-                                <button class="view-btn">View</button>
-                                <button class="edit-btn">Edit</button>
-                                <button class="delete-btn">Delete</button>
-                            </td>
-                        </tr>
                     </tbody>
                 </table>
             </div>
@@ -727,7 +714,7 @@
 
                 <div class="info-group">
                     <label for="deposit-reference">Reference Number:</label>
-                    <input type="text" id="deposit-reference" placeholder="REF0000000000001" readonly>
+                    <input type="text" id="deposit-reference" placeholder="" readonly>
                 </div>
                 <div class="info-group">
                     <label for="deposit-type">Deposit Method:</label>
@@ -792,14 +779,15 @@
                     <input type="text" id="withdraw-account-balance" placeholder="Current Balance" readonly>
                 </div>
             </div>
+            <form id="withdraw-form">
             <div class="withdraw-information">
                 <div class="info-group">
                     <label for="withdraw-reference">Reference Number:</label>
-                    <input type="text" id="withdraw-reference" placeholder="REF0000000000001" readonly>
+                    <input type="text" id="withdraw-reference" placeholder="" readonly>
                 </div>
                 <div class="info-group">
-                    <label for="withdraw-method">Withdrawal Method:</label>
-                    <select type="text" id="withdraw-method" placeholder="Withdrawal Method">
+                    <label for="withdraw-type">Withdrawal Method:</label>
+                    <select type="text" id="withdraw-type" placeholder="Withdrawal Method">
                         <option value="cash withdrawal">Cash</option>
                         <option value="check withdrawal">Check</option>
                     </select>
@@ -818,8 +806,9 @@
                 </div>
             </div>
             <div class="withdraw-actions">
-                <button type="button" id="withdraw-btn">Withdraw</button>
+                <button type="submit" id="withdraw-btn" name="withdraw-form">Withdraw</button>
             </div>
+            </form>
         </div>
 
         <div class="content" id="transfer-operations">
@@ -849,8 +838,8 @@
                         <input type="text" id="sender-account-number" placeholder="Account Number" readonly>
                     </div>
                     <div class="info-group">
-                        <label for="sender-bank-name">Bank Name:</label>
-                        <input type="text" id="sender-bank-name" placeholder="Bank Name" readonly>
+                        <label for="sender-account-name">Account Name:</label>
+                        <input type="text" id="sender-account-name" placeholder="Account Name" readonly>
                     </div>
                     <div class="info-group">
                         <label for="sender-account-status">Account Status:</label>
@@ -872,8 +861,8 @@
                         <input type="text" id="receiver-account-number" placeholder="Account Number" readonly>
                     </div>
                     <div class="info-group">
-                        <label for="receiver-bank-name">Bank Name:</label>
-                        <input type="text" id="receiver-bank-name" placeholder="Bank Name" readonly>
+                        <label for="receiver-account-name">Account Name:</label>
+                        <input type="text" id="receiver-account-name" placeholder="Account Name" readonly>
                     </div>
                     <div class="info-group">
                         <label for="receiver-account-status">Account Status:</label>
@@ -885,15 +874,16 @@
                     </div>
                 </div>
             </div>
+            <form id="transfer-form">
             <div class="transfer-details">
                 <div class="transaction-details">
                     <div class="info-group">
                         <label for="transfer-reference">Reference Number:</label>
-                        <input type="text" id="transfer-reference" placeholder="REF0000000000001" readonly>
+                        <input type="text" id="transfer-reference" placeholder="" readonly>
                     </div>
                     <div class="info-group">
-                        <label for="transfer-method">Transfer Method:</label>
-                        <select type="text" id="transfer-method" placeholder="Transfer Method">
+                        <label for="transfer-type">Transfer Method:</label>
+                        <select type="text" id="transfer-type" placeholder="Transfer Method">
                             <option value="internal transfer">Internal Transfer</option>
                             <option value="external transfer">External Transfer</option>
                         </select>
@@ -908,12 +898,13 @@
                     </div>
                 </div>
                 <div class="transfer-total">
-                    <h1>Transfer Fee: <span id="transfer-fee">$0.00</span></h1>
-                    <h1>Total Transfer Amount: <span id="transfer-total">$0.00</span></h1>
+                    <h1>Transfer Fee: <span id="transfer-fee">₱0.00</span></h1>
+                    <h1>Total Transfer Amount: <span id="transfer-total">₱0.00</span></h1>
                     <div class="transfer-actions">
-                        <button type="button" id="transfer-btn">Transfer</button>
+                        <button type="submit" id="transfer-btn" name="transfer-form">Transfer</button>
                     </div>
                 </div>
+            </form>
             </div>
         </div>
 
@@ -925,25 +916,25 @@
                     <i class="fas fa-search search-icon"></i>
                 </div>
                 <select id="transaction-type-filter">
-                    <option value="">All Types</option>
+                    <option value="all">All Types</option>
                     <optgroup label="Account Creation & Closure">
-                        <option value="Account Creation">Account Creation</option>
-                        <option value="Account Closure">Account Closure</option>
+                        <option value="account creation">Account Creation</option>
+                        <option value="account closure">Account Closure</option>
                     </optgroup>
                     <optgroup label="Deposit">
-                        <option value="Deposit">All Deposits</option>
-                        <option value="Deposit - Cash">Cash Deposit</option>
-                        <option value="Deposit - Check">Check Deposit</option>
+                        <option value="deposit">All Deposits</option>
+                        <option value="deposit cash">Cash Deposit</option>
+                        <option value="deposit check">Check Deposit</option>
                     </optgroup>
                     <optgroup label="Withdrawal">
-                        <option value="Withdrawal">All Withdrawals</option>
-                        <option value="Withdrawal - Cash">Cash Withdrawal</option>
-                        <option value="Withdrawal - Check">Check Withdrawal</option>
+                        <option value="withdrawal">All Withdrawals</option>
+                        <option value="withdrawal cash">Cash Withdrawal</option>
+                        <option value="withdrawal check">Check Withdrawal</option>
                     </optgroup>
                     <optgroup label="Transfer">
-                        <option value="Transfer">All Transfers</option>
-                        <option value="Transfer - Internal">Internal Transfer</option>
-                        <option value="Transfer - External">External Transfer</option>
+                        <option value="transfer">All Transfers</option>
+                        <option value="transfer internal">Internal Transfer</option>
+                        <option value="transfer external">External Transfer</option>
                     </optgroup>
                 </select>
                 <label for="start-date-filter">Start Date:</label>
@@ -951,7 +942,7 @@
                 <label for="end-date-filter">End Date:</label>
                 <input type="date" id="end-date-filter" placeholder="Select End Date">
 
-                <button type="button" id="account-filter-btn">Filter</button>
+                <button type="button" id="transaction-filter-btn">Filter</button>
             </div>
 
             <div class="transaction-table">
@@ -959,8 +950,8 @@
                     <thead>
                         <tr>
                             <th>Reference Number</th>
-                            <th>Account Name</th>
                             <th>Account Number</th>
+                            <th>Account Name</th>
                             <th>Transaction Type</th>
                             <th>Transact With</th>
                             <th>Date & Time</th>
@@ -969,23 +960,13 @@
                         </tr>
                     </thead>
                     <tbody id="transaction-table-body">
-                        <tr>
-                            <td>REF000000000001</td>
-                            <td>John Doe</td>
-                            <td>ACC001</td>
-                            <td>Account Creation</td>
-                            <td>John Doe</td>
-                            <td>2023-01-01 10:00 AM</td>
-                            <td>Juan Dela Cruz</td>
-                            <td>PHP 10,000.00</td>
-                        </tr>
                     </tbody>
                 </table>
             </div>
-            <div class="pagination-container">
-                <button id="bank-btn-prev" onclick="prevPage()"><i class="fas fa-chevron-left"></i></button>
-                <div id="bank-page-numbers">X</div>
-                <button id="bank-btn-next" onclick="nextPage()"><i class="fas fa-chevron-right"></i></button>
+            <div class="pagination-controls" id="transaction-pagination-controls">
+                <button id="transaction-btn-prev" onclick="prevPage()"><i class="fas fa-chevron-left"></i></button>
+                <div id="transaction-page-numbers">X</div>
+                <button id="transaction-btn-next" onclick="nextPage()"><i class="fas fa-chevron-right"></i></button>
             </div>
 
         </div>

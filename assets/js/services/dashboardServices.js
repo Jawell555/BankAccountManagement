@@ -25,7 +25,7 @@ export function currencyFormat(amount) {
 
 export function employeeIDFormat(id) {
   const idStr = id.toString();
-  const prefix = 'EMP' + (idStr.length < 6 ? '0'.repeat(6 - idStr.length) : '');
+  const prefix = 'EMP' + (idStr.length < 12 ? '0'.repeat(12 - idStr.length) : '');
   return prefix + idStr;
 }
 //Sidebar
